@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
     where: { userId },
   })
   const tamponCount = await prisma.userTampon.count({ where: { userId } })
+  const recompenseCount = await prisma.userRecompense.count({ where: { userId } })
   const histoireCount = await prisma.userHistoire.count({ where: { userId } })
 
   const level = getUserLevel(checkinCount)
@@ -38,6 +39,7 @@ export default defineEventHandler(async (event) => {
       checkins: checkinCount,
       uniqueRestaurants: uniqueRestaurants.length,
       tampons: tamponCount,
+      recompenses: recompenseCount,
       histoires: histoireCount,
       level: {
         name: level,

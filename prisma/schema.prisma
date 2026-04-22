@@ -16,6 +16,7 @@ model User {
   checkins      Checkin[]
   userTampons   UserTampon[]
   userHistoires UserHistoire[]
+  userRecompenses UserRecompense[]
 
   @@map("users")
 }
@@ -52,6 +53,7 @@ model Restaurant {
   isVisual     Boolean      @default(false) @map("is_visual")
 
   checkins Checkin[]
+  tampon   Tampon?
 
   @@map("restaurants")
 }
@@ -69,12 +71,12 @@ model Checkin {
 }
 
 model Tampon {
-  id          Int    @id @default(autoincrement())
-  name        String
-  description String
-  icon        String
-  condition   String
+  id           Int      @id @default(autoincrement())
+  restaurantId Int      @unique @map("restaurant_id")
+  imageUrl     String?  @map("image_url")
+  color        String
 
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   userTampons UserTampon[]
 
   @@map("tampons")
@@ -84,13 +86,41 @@ model UserTampon {
   id         Int      @id @default(autoincrement())
   userId     Int      @map("user_id")
   tamponId   Int      @map("tampon_id")
-  unlockedAt DateTime @default(now()) @map("unlocked_at")
+  pageNumber Int      @map("page_number")
+  positionX  Float    @map("position_x")
+  positionY  Float    @map("position_y")
+  collectedAt DateTime @default(now()) @map("collected_at")
 
   user   User   @relation(fields: [userId], references: [id])
   tampon Tampon @relation(fields: [tamponId], references: [id])
 
-  @@unique([userId, tamponId])
+  @@index([userId, collectedAt])
   @@map("user_tampons")
+}
+
+model Recompense {
+  id             Int      @id @default(autoincrement())
+  tamponRequired Int      @unique @map("tampon_required")
+  titre          String
+  description    String
+
+  userRecompenses UserRecompense[]
+
+  @@map("recompenses")
+}
+
+model UserRecompense {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  recompenseId Int       @map("recompense_id")
+  unlockedAt   DateTime  @default(now()) @map("unlocked_at")
+  isUsed       Boolean   @default(false) @map("is_used")
+
+  user       User      @relation(fields: [userId], references: [id])
+  recompense Recompense @relation(fields: [recompenseId], references: [id])
+
+  @@unique([userId, recompenseId])
+  @@map("user_recompenses")
 }
 
 model Histoire {

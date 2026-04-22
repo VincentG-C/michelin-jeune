@@ -10,6 +10,13 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL! })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
+type SeedRestaurant = {
+  id: number
+  name: string
+  michelinType: string
+  isEco: boolean
+}
+
 async function main() {
   console.log('🌱 Seeding database...')
 
@@ -145,7 +152,7 @@ async function main() {
       },
 
       {
-        name: "Le Petit Cler",
+        name: "Le Bistrot des Fables",
         address: "29 Rue Cler, 75007 Paris",
         lat: 48.8572,
         lng: 2.3046,
@@ -161,7 +168,7 @@ async function main() {
         isVisual: false,
       },
       {
-        name: "Grandcoeur",
+        name: "La Table de Mee",
         address: "41 Rue du Temple, 75004 Paris",
         lat: 48.8588,
         lng: 2.3540,
@@ -177,7 +184,7 @@ async function main() {
         isVisual: true,
       },
       {
-        name: "Abri",
+        name: "La Cloche d'Or",
         address: "92 Rue du Faubourg Poissonnière, 75010 Paris",
         lat: 48.8765,
         lng: 2.3492,
@@ -277,73 +284,76 @@ async function main() {
   })
   console.log(`✅ ${restaurants.count} restaurants créés`)
 
-  const tamponsData = [
+  const allRestaurants = await prisma.restaurant.findMany({
+    select: {
+      id: true,
+      name: true,
+      michelinType: true,
+      isEco: true,
+    },
+  }) as SeedRestaurant[]
+
+  const designerTampons: Record<string, string> = {
+    'Le Bistrot des Fables': '/tampons/le-bistrot-des-fables.png',
+    'La Table de Mee': '/tampons/la-table-de-mee.png',
+    "La Cloche d'Or": '/tampons/la-cloche-dor.png',
+  }
+
+  const getTamponColor = (michelinType: string, isEco: boolean): string => {
+    if (michelinType.startsWith('etoile')) return 'bordeaux'
+    if (michelinType === 'bib' || isEco) return 'vert'
+    return 'bleu'
+  }
+
+  const tamponsData = allRestaurants.map((restaurant: SeedRestaurant) => ({
+    restaurantId: restaurant.id,
+    imageUrl: designerTampons[restaurant.name] ?? null,
+    color: getTamponColor(restaurant.michelinType, restaurant.isEco),
+  }))
+
+  const tampons = await prisma.tampon.createMany({
+    data: tamponsData,
+  })
+  console.log(`✅ ${tampons.count} tampons restaurants créés`)
+
+  const recompensesData = [
     {
-      name: "Premier Pas",
-      description: "Effectuer votre premier check-in",
-      icon: "👣",
-      condition: JSON.stringify({ type: "checkin_count", value: 1 }),
+      tamponRequired: 1,
+      titre: 'Histoire Michelin débloquée',
+      description: 'Débloque une histoire Michelin dès votre premier tampon.',
     },
     {
-      name: "Curieux",
-      description: "Visiter 3 restaurants",
-      icon: "🍽️",
-      condition: JSON.stringify({ type: "checkin_count", value: 3 }),
+      tamponRequired: 3,
+      titre: 'Verre offert',
+      description: 'Un verre offert pour célébrer vos 3 premiers tampons.',
     },
     {
-      name: "Découvreur",
-      description: "Visiter 5 restaurants",
-      icon: "⭐",
-      condition: JSON.stringify({ type: "checkin_count", value: 5 }),
+      tamponRequired: 5,
+      titre: 'Dessert offert',
+      description: 'Un dessert offert après 5 tampons collectés.',
     },
     {
-      name: "Explorateur",
-      description: "Visiter 10 restaurants",
-      icon: "🔍",
-      condition: JSON.stringify({ type: "checkin_count", value: 10 }),
+      tamponRequired: 10,
+      titre: 'Entrée offerte',
+      description: 'Une entrée offerte pour 10 tampons cumulés.',
     },
     {
-      name: "Connaisseur",
-      description: "Visiter 25 restaurants",
-      icon: "🎩",
-      condition: JSON.stringify({ type: "checkin_count", value: 25 }),
+      tamponRequired: 15,
+      titre: 'Repas -20%',
+      description: 'Profitez de 20% de réduction après 15 tampons.',
     },
     {
-      name: "Grand Gastronome",
-      description: "Visiter 50 restaurants",
-      icon: "🏆",
-      condition: JSON.stringify({ type: "checkin_count", value: 50 }),
-    },
-    {
-      name: "Chasseur d'Étoiles",
-      description: "Visiter un restaurant 3 étoiles",
-      icon: "🌟",
-      condition: JSON.stringify({ type: "michelinType", value: "etoile_3" }),
-    },
-    {
-      name: "Pépite Trouvée",
-      description: "Visiter une pépite cachée",
-      icon: "🤫",
-      condition: JSON.stringify({ type: "hidden_gem", value: true }),
-    },
-    {
-      name: "Éco-Responsable",
-      description: "Visiter un restaurant eco-friendly",
-      icon: "🌿",
-      condition: JSON.stringify({ type: "eco", value: true }),
-    },
-    {
-      name: "Bib Gourmand Fan",
-      description: "Visiter 3 restaurants Bib Gourmand",
-      icon: "😋",
-      condition: JSON.stringify({ type: "bib_count", value: 3 }),
+      tamponRequired: 20,
+      titre: 'Invitation cérémonie Michelin',
+      description: 'Invitation exclusive à la cérémonie Michelin.',
     },
   ]
 
-  for (const tampon of tamponsData) {
-    await prisma.tampon.create({ data: tampon })
-  }
-  console.log(`✅ ${tamponsData.length} tampons créés`)
+  const recompenses = await prisma.recompense.createMany({
+    data: recompensesData,
+    skipDuplicates: true,
+  })
+  console.log(`✅ ${recompenses.count} récompenses créées`)
 
   const histoiresData = [
     {
