@@ -1,5 +1,5 @@
-import { prisma } from '~/server/utils/db'
-import { getDistanceInMeters } from '~/server/utils/checkin'
+import { prisma } from '~~/server/utils/db'
+import { getDistanceInMeters } from '~~/server/utils/checkin'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)

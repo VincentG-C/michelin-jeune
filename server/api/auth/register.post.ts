@@ -1,5 +1,5 @@
-import { prisma } from '~/server/utils/db'
-import { hashPassword, generateToken } from '~/server/utils/auth'
+import { prisma } from '~~/server/utils/db'
+import { hashPassword, generateToken } from '~~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

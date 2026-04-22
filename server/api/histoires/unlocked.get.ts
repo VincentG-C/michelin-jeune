@@ -1,5 +1,5 @@
-import { prisma } from '~/server/utils/db'
-import { getUserIdFromEvent } from '~/server/utils/auth'
+import { prisma } from '~~/server/utils/db'
+import { getUserIdFromEvent } from '~~/server/utils/auth'
 
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)

@@ -1,6 +1,6 @@
-import { prisma } from '~/server/utils/db'
-import { getUserIdFromEvent } from '~/server/utils/auth'
-import { getDistanceInMeters, checkAndUnlockTampons, checkAndUnlockHistoires } from '~/server/utils/checkin'
+import { prisma } from '~~/server/utils/db'
+import { getUserIdFromEvent } from '~~/server/utils/auth'
+import { getDistanceInMeters, checkAndUnlockTampons, checkAndUnlockHistoires } from '~~/server/utils/checkin'
 
 const CHECKIN_RADIUS_METERS = 200
 

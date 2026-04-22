@@ -19,7 +19,9 @@ WORKDIR /app
 COPY --from=base /app/.output ./.output
 COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=base /app/node_modules/prisma ./node_modules/prisma
 COPY --from=base /app/prisma ./prisma
+COPY --from=base /app/prisma.config.ts ./prisma.config.ts
 COPY --from=base /app/package.json ./
 
 RUN npm install -g prisma
