@@ -3,7 +3,6 @@ import { prisma } from '~/server/utils/db'
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
 
-  // Build filter conditions
   const where: any = {}
 
   if (query.budget) {
@@ -18,7 +17,6 @@ export default defineEventHandler(async (event) => {
     where.michelinType = query.michelin_type
   }
 
-  // Vibe filters
   if (query.vibe) {
     const vibes = (query.vibe as string).split(',')
     if (vibes.includes('eco')) where.isEco = true
@@ -26,13 +24,11 @@ export default defineEventHandler(async (event) => {
     if (vibes.includes('visual')) where.isVisual = true
   }
 
-  // Geo bounding box filter (optional, for map viewport)
   if (query.lat && query.lng) {
     const lat = parseFloat(query.lat as string)
     const lng = parseFloat(query.lng as string)
-    const radius = parseFloat((query.radius as string) || '5') // km
+    const radius = parseFloat((query.radius as string) || '5')
 
-    // Approximate bounding box
     const latDelta = radius / 111
     const lngDelta = radius / (111 * Math.cos(lat * Math.PI / 180))
 

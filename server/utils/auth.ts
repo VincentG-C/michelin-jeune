@@ -5,7 +5,6 @@ import type { H3Event } from 'h3'
 const JWT_SECRET = process.env.JWT_SECRET || 'michelin_jwt_secret_hackathon_2026'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
 
-// ─── Password helpers ─────────────────────────────
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
 }
@@ -14,7 +13,6 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash)
 }
 
-// ─── JWT helpers ──────────────────────────────────
 export function generateToken(userId: number): string {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 }
@@ -23,7 +21,6 @@ export function verifyToken(token: string): { userId: number } {
   return jwt.verify(token, JWT_SECRET) as { userId: number }
 }
 
-// ─── Auth middleware helper ───────────────────────
 export function getUserIdFromEvent(event: H3Event): number {
   const authHeader = getHeader(event, 'authorization')
 
@@ -47,7 +44,6 @@ export function getUserIdFromEvent(event: H3Event): number {
   }
 }
 
-// ─── Niveau utilisateur ───────────────────────────
 export function getUserLevel(checkinCount: number): string {
   if (checkinCount > 50) return 'Grand Gastronome'
   if (checkinCount >= 26) return 'Inspecteur'

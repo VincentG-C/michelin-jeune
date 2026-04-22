@@ -15,7 +15,6 @@ export default defineEventHandler(async (event) => {
   const lng = parseFloat(query.lng as string)
   const radiusKm = parseFloat((query.radius as string) || '5')
 
-  // Get restaurants within approximate bounding box first (fast DB query)
   const latDelta = radiusKm / 111
   const lngDelta = radiusKm / (111 * Math.cos(lat * Math.PI / 180))
 
@@ -26,7 +25,6 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  // Refine with precise distance calculation
   const nearby = restaurants
     .map((r) => ({
       ...r,

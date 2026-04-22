@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -44,7 +43,7 @@ export default defineNuxtConfig({
             cacheName: 'unsplash-images',
             expiration: {
               maxEntries: 50,
-              maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              maxAgeSeconds: 60 * 60 * 24 * 30,
             },
           },
         },
@@ -69,7 +68,7 @@ export default defineNuxtConfig({
 
   nitro: {
     experimental: {
-      openAPI: true, // Enables /api/_openapi.json for API docs
+      openAPI: true,
     },
   },
 })

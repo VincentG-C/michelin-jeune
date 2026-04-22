@@ -4,7 +4,6 @@ import { verifyPassword, generateToken } from '~/server/utils/auth'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  // Validation
   if (!body.email || !body.password) {
     throw createError({
       statusCode: 400,
@@ -12,7 +11,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Find user
   const user = await prisma.user.findUnique({
     where: { email: body.email },
   })
@@ -24,7 +22,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Verify password
   const isValid = await verifyPassword(body.password, user.password)
 
   if (!isValid) {
@@ -34,7 +31,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Generate token
   const token = generateToken(user.id)
 
   return {

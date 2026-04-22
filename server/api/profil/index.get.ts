@@ -21,7 +21,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Stats
   const checkinCount = await prisma.checkin.count({ where: { userId } })
   const uniqueRestaurants = await prisma.checkin.groupBy({
     by: ['restaurantId'],

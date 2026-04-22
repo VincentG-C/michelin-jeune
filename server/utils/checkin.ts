@@ -1,12 +1,11 @@
 import { prisma } from './db'
 import { getUserLevel } from './auth'
 
-// ─── Distance calculation (Haversine) ─────────────
 export function getDistanceInMeters(
   lat1: number, lng1: number,
   lat2: number, lng2: number
 ): number {
-  const R = 6371000 // Earth radius in meters
+  const R = 6371000
   const dLat = toRad(lat2 - lat1)
   const dLng = toRad(lng2 - lng1)
   const a =
@@ -21,11 +20,9 @@ function toRad(deg: number): number {
   return deg * (Math.PI / 180)
 }
 
-// ─── Check & unlock tampons ───────────────────────
 export async function checkAndUnlockTampons(userId: number): Promise<any[]> {
   const newUnlocks: any[] = []
 
-  // Get user's checkins with restaurant details
   const checkins = await prisma.checkin.findMany({
     where: { userId },
     include: { restaurant: true },
@@ -33,7 +30,6 @@ export async function checkAndUnlockTampons(userId: number): Promise<any[]> {
 
   const checkinCount = checkins.length
 
-  // Get already unlocked tampons
   const unlockedTamponIds = (
     await prisma.userTampon.findMany({
       where: { userId },
@@ -41,7 +37,6 @@ export async function checkAndUnlockTampons(userId: number): Promise<any[]> {
     })
   ).map((ut) => ut.tamponId)
 
-  // Get all tampons not yet unlocked
   const lockedTampons = await prisma.tampon.findMany({
     where: { id: { notIn: unlockedTamponIds.length > 0 ? unlockedTamponIds : [0] } },
   })
@@ -90,11 +85,9 @@ export async function checkAndUnlockTampons(userId: number): Promise<any[]> {
   return newUnlocks
 }
 
-// ─── Check & unlock histoires ─────────────────────
 export async function checkAndUnlockHistoires(userId: number): Promise<any[]> {
   const newUnlocks: any[] = []
 
-  // Get user's checkins
   const checkins = await prisma.checkin.findMany({
     where: { userId },
     include: { restaurant: true },
@@ -103,7 +96,6 @@ export async function checkAndUnlockHistoires(userId: number): Promise<any[]> {
   const checkinCount = checkins.length
   const userLevel = getUserLevel(checkinCount)
 
-  // Get already unlocked histoires
   const unlockedHistoireIds = (
     await prisma.userHistoire.findMany({
       where: { userId },
@@ -111,12 +103,10 @@ export async function checkAndUnlockHistoires(userId: number): Promise<any[]> {
     })
   ).map((uh) => uh.histoireId)
 
-  // Get all histoires not yet unlocked
   const lockedHistoires = await prisma.histoire.findMany({
     where: { id: { notIn: unlockedHistoireIds.length > 0 ? unlockedHistoireIds : [0] } },
   })
 
-  // Level hierarchy for comparison
   const levelOrder = ['Novice', 'Curieux', 'Découvreur', 'Connaisseur', 'Inspecteur', 'Grand Gastronome']
 
   for (const histoire of lockedHistoires) {

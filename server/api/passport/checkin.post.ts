@@ -8,7 +8,6 @@ export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
   const body = await readBody(event)
 
-  // Validation
   if (!body.restaurant_id || body.lat === undefined || body.lng === undefined) {
     throw createError({
       statusCode: 400,
@@ -18,7 +17,6 @@ export default defineEventHandler(async (event) => {
 
   const restaurantId = parseInt(body.restaurant_id)
 
-  // Get restaurant
   const restaurant = await prisma.restaurant.findUnique({
     where: { id: restaurantId },
   })
@@ -30,7 +28,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check distance
   const distance = getDistanceInMeters(
     body.lat, body.lng,
     restaurant.lat, restaurant.lng
@@ -43,7 +40,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check if already checked in today
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const tomorrow = new Date(today)
@@ -64,13 +60,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Create checkin
   const checkin = await prisma.checkin.create({
     data: { userId, restaurantId },
     include: { restaurant: true },
   })
 
-  // Check for new unlocks
   const newTampons = await checkAndUnlockTampons(userId)
   const newHistoires = await checkAndUnlockHistoires(userId)
 

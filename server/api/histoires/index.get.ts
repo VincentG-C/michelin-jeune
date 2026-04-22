@@ -1,7 +1,6 @@
 import { prisma } from '~/server/utils/db'
 
 export default defineEventHandler(async () => {
-  // Return all histoires (without content for the list view)
   const histoires = await prisma.histoire.findMany({
     select: {
       id: true,

@@ -4,26 +4,22 @@ import { getUserIdFromEvent, getUserLevel, getUserLevelEmoji } from '~/server/ut
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
 
-  // Get all checkins with restaurant info
   const checkins = await prisma.checkin.findMany({
     where: { userId },
     include: { restaurant: true },
     orderBy: { checkedAt: 'desc' },
   })
 
-  // Get unlocked tampons
   const tampons = await prisma.userTampon.findMany({
     where: { userId },
     include: { tampon: true },
     orderBy: { unlockedAt: 'desc' },
   })
 
-  // Calculate level
   const checkinCount = checkins.length
   const level = getUserLevel(checkinCount)
   const emoji = getUserLevelEmoji(level)
 
-  // Unique restaurants visited
   const uniqueRestaurants = new Set(checkins.map((c) => c.restaurantId)).size
 
   return {

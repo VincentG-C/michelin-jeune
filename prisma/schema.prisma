@@ -73,7 +73,7 @@ model Tampon {
   name        String
   description String
   icon        String
-  condition   String // JSON string, e.g. {"type":"checkin_count","value":3}
+  condition   String
 
   userTampons UserTampon[]
 
@@ -98,7 +98,7 @@ model Histoire {
   titre           String
   contenu         String
   imageCarteUrl   String? @map("image_carte_url")
-  conditionUnlock String  @map("condition_unlock") // JSON string, e.g. {"type":"niveau","value":"Découvreur"} or {"type":"restaurant","value":5}
+  conditionUnlock String  @map("condition_unlock")
 
   userHistoires UserHistoire[]
 

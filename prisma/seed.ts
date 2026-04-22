@@ -1,14 +1,17 @@
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 
-const prisma = new PrismaClient()
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL! })
+const adapter = new PrismaPg(pool)
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log('🌱 Seeding database...')
 
-  // ─── RESTAURANTS ────────────────────────────────
   const restaurants = await prisma.restaurant.createMany({
     data: [
-      // ⭐ Étoilés
       {
         name: "L'Ambroisie",
         address: "9 Place des Vosges, 75004 Paris",
@@ -138,7 +141,6 @@ async function main() {
         is_visual: true,
       },
 
-      // 🍴 Bib Gourmand
       {
         name: "Le Petit Cler",
         address: "29 Rue Cler, 75007 Paris",
@@ -220,7 +222,6 @@ async function main() {
         is_visual: false,
       },
 
-      // 🏨 Hôtels
       {
         name: "Le Meurice",
         address: "228 Rue de Rivoli, 75001 Paris",
@@ -273,7 +274,6 @@ async function main() {
   })
   console.log(`✅ ${restaurants.count} restaurants créés`)
 
-  // ─── TAMPONS ────────────────────────────────────
   const tamponsData = [
     {
       name: "Premier Pas",
@@ -342,7 +342,6 @@ async function main() {
   }
   console.log(`✅ ${tamponsData.length} tampons créés`)
 
-  // ─── HISTOIRES ──────────────────────────────────
   const histoiresData = [
     {
       titre: "La Naissance du Guide",
@@ -377,7 +376,7 @@ async function main() {
       contenu:
         "Créé en 1997, le Bib Gourmand (du surnom de Bibendum, la mascotte Michelin) récompense les restaurants offrant un excellent rapport qualité-prix. C'est la reconnaissance que la bonne cuisine n'est pas réservée aux grandes tables. Le Bib est devenu un symbole pour les gourmets malins qui veulent bien manger sans se ruiner.",
       image_carte_url: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
-      condition_unlock: JSON.stringify({ type: "restaurant", value: 9 }), // Premier bib gourmand
+      condition_unlock: JSON.stringify({ type: "restaurant", value: 9 }),
     },
     {
       titre: "Bibendum : La Mascotte Immortelle",

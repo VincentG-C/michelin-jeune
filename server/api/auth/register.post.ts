@@ -4,7 +4,6 @@ import { hashPassword, generateToken } from '~/server/utils/auth'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
-  // Validation
   if (!body.email || !body.password || !body.username) {
     throw createError({
       statusCode: 400,
@@ -12,7 +11,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check if email already exists
   const existingUser = await prisma.user.findFirst({
     where: {
       OR: [
@@ -31,7 +29,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Create user
   const hashedPassword = await hashPassword(body.password)
   const user = await prisma.user.create({
     data: {
@@ -41,7 +38,6 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  // Generate token
   const token = generateToken(user.id)
 
   return {

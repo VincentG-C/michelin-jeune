@@ -4,7 +4,6 @@ import pg from 'pg'
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://admin:michelin2026@localhost:5432/michelin_pulse'
 
-// Singleton pattern pour éviter les multiples instances en dev
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }

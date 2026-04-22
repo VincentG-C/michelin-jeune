@@ -5,11 +5,9 @@ export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
   const body = await readBody(event)
 
-  // Only allow updating username and email
   const updateData: any = {}
 
   if (body.username) {
-    // Check if username is taken
     const existing = await prisma.user.findFirst({
       where: {
         username: body.username,
@@ -28,7 +26,6 @@ export default defineEventHandler(async (event) => {
   }
 
   if (body.email) {
-    // Check if email is taken
     const existing = await prisma.user.findFirst({
       where: {
         email: body.email,
