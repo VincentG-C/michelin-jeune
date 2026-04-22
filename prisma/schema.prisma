@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  checkins      Checkin[]
+  userTampons   UserTampon[]
+  userHistoires UserHistoire[]
+
+  @@map("users")
+}
+
+enum MichelinType {
+  etoile_1
+  etoile_2
+  etoile_3
+  bib
+  hotel
+}
+
+enum Budget {
+  low
+  medium
+  high
+}
+
+model Restaurant {
+  id           Int          @id @default(autoincrement())
+  name         String
+  address      String
+  lat          Float
+  lng          Float
+  michelinType MichelinType @map("michelin_type")
+  stars        Int          @default(0)
+  budget       Budget       @default(medium)
+  cuisine      String?
+  ambiance     String?
+  photoUrl     String?      @map("photo_url")
+  description  String?
+  isEco        Boolean      @default(false) @map("is_eco")
+  isHiddenGem  Boolean      @default(false) @map("is_hidden_gem")
+  isVisual     Boolean      @default(false) @map("is_visual")
+
+  checkins Checkin[]
+
+  @@map("restaurants")
+}
+
+model Checkin {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  restaurantId Int      @map("restaurant_id")
+  checkedAt    DateTime @default(now()) @map("checked_at")
+
+  user       User       @relation(fields: [userId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("checkins")
+}
+
+model Tampon {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  icon        String
+  condition   String
+
+  userTampons UserTampon[]
+
+  @@map("tampons")
+}
+
+model UserTampon {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  tamponId   Int      @map("tampon_id")
+  unlockedAt DateTime @default(now()) @map("unlocked_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  tampon Tampon @relation(fields: [tamponId], references: [id])
+
+  @@unique([userId, tamponId])
+  @@map("user_tampons")
+}
+
+model Histoire {
+  id              Int    @id @default(autoincrement())
+  titre           String
+  contenu         String
+  imageCarteUrl   String? @map("image_carte_url")
+  conditionUnlock String  @map("condition_unlock")
+
+  userHistoires UserHistoire[]
+
+  @@map("histoires")
+}
+
+model UserHistoire {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  histoireId Int      @map("histoire_id")
+  unlockedAt DateTime @default(now()) @map("unlocked_at")
+
+  user     User     @relation(fields: [userId], references: [id])
+  histoire Histoire @relation(fields: [histoireId], references: [id])
+
+  @@unique([userId, histoireId])
+  @@map("user_histoires")
+}
