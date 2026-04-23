@@ -10,6 +10,9 @@ RUN npx prisma generate
 
 COPY . .
 
+ARG MAPBOX_PUBLIC_TOKEN
+ENV MAPBOX_PUBLIC_TOKEN=$MAPBOX_PUBLIC_TOKEN
+
 RUN npm run build
 
 FROM node:20-alpine AS production
