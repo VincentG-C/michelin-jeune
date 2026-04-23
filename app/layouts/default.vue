@@ -4,27 +4,17 @@
     
     <nav class="bottom-nav">
       <NuxtLink to="/histoires" class="nav-item" active-class="active">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m2 16 9 6 9-6"/>
-          <path d="M2 12l9 6 9-6"/>
-          <path d="M11 2L2 8l9 6 9-6-9-6z"/>
-        </svg>
+        <img src="/images/icon-histoire.png" alt="Histoire" class="nav-icon" />
         <span>Histoire</span>
       </NuxtLink>
       
       <NuxtLink to="/" class="nav-item" active-class="active" exact-active-class="active">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="10" r="3"/>
-          <path d="M12 21c-4-4-8-9-8-13a8 8 0 0 1 16 0c0 4-4 9-8 13z"/>
-        </svg>
+        <img src="/images/icon-map.svg" alt="Map" class="nav-icon" />
         <span>Map</span>
       </NuxtLink>
       
       <NuxtLink to="/profil" class="nav-item" active-class="active">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
+        <img src="/images/icon-profil.svg" alt="Profil" class="nav-icon" />
         <span>Profil</span>
       </NuxtLink>
     </nav>
@@ -61,8 +51,10 @@
   height: 100%;
 }
 
-.nav-item svg {
+.nav-item .nav-icon {
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  width: 24px;
+  height: 24px;
 }
 
 .nav-item span {
@@ -75,9 +67,8 @@
   color: var(--color-michelin-red);
 }
 
-.nav-item.active svg {
+.nav-item.active .nav-icon {
   transform: translateY(-4px) scale(1.1);
-  stroke-width: 2.5px;
 }
 
 .nav-item.active span {

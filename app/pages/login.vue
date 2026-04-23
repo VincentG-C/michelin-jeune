@@ -284,8 +284,13 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   animation: pulse 2s infinite ease-in-out;
+}
+
+.logo img {
+  width: 130px;
+  height: auto;
 }
 
 @keyframes pulse {
@@ -297,8 +302,8 @@ const handleLogin = async () => {
 .splash-title {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 3rem;
-  font-weight: 500;
+  font-size: 2.8rem;
+  font-weight: 400;
   letter-spacing: 0.5px;
   margin: 0;
 }
@@ -308,31 +313,32 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding: 0 32px;
+  padding: 0 24px;
 }
 
 .auth-header {
-  margin-top: 60px;
+  margin-top: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .auth-title {
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 2.2rem;
-  font-weight: 500;
+  font-weight: 400;
   text-align: center;
   margin: 0;
 }
 
 .squiggly-line {
   opacity: 0.9;
-  width: 100%;
-  max-width: 300px;
+  width: 90%;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
 /* SELECT VIEW */
@@ -348,8 +354,9 @@ const handleLogin = async () => {
   font-size: 0.85rem;
   line-height: 1.5;
   opacity: 0.9;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   font-weight: 300;
+  padding: 0 10px;
 }
 
 .continue-text {
@@ -364,16 +371,16 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .auth-btn {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 48px;
+  height: 52px;
   border: 1px solid white;
-  border-radius: 24px;
+  border-radius: 26px;
   background: transparent;
   color: white;
   position: relative;
@@ -392,14 +399,14 @@ const handleLogin = async () => {
 }
 
 .auth-btn .icon img {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .auth-btn .btn-text {
   flex: 1;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 400;
 }
 
@@ -421,27 +428,27 @@ const handleLogin = async () => {
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .input-group label {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 1.6rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  font-size: 1.8rem;
+  font-weight: 400;
+  letter-spacing: 0px;
 }
 
 .input-group input {
-  height: 44px;
-  border: 1px solid white;
-  border-radius: 22px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
   background: transparent;
   color: white;
   padding: 0 24px;
@@ -456,6 +463,7 @@ const handleLogin = async () => {
 .input-group input:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.05);
+  border-color: white;
 }
 
 .error-msg {
@@ -522,12 +530,12 @@ const handleLogin = async () => {
   margin-top: auto;
   display: flex;
   justify-content: center;
-  padding-bottom: 20px;
+  padding-bottom: 30px;
   padding-top: 10px;
   opacity: 0.9;
 }
 .illustration-bottom img {
-  max-height: 120px;
+  max-height: 130px;
 }
 
 /* ANIMATIONS */
