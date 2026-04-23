@@ -212,7 +212,7 @@ watch(() => route.params.id, (newId) => {
 }
 
 .story-card {
-  background: white;
+  background: #F4F1EA;
   border-radius: 24px;
   width: 100%;
   overflow: hidden;
