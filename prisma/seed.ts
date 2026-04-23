@@ -20,6 +20,19 @@ type SeedRestaurant = {
 async function main() {
   console.log('🌱 Seeding database...')
 
+  // Clean existing data (order matters for foreign keys)
+  console.log('🧹 Nettoyage des données existantes...')
+  await prisma.userHistoire.deleteMany()
+  await prisma.userTampon.deleteMany()
+  await prisma.userRecompense.deleteMany()
+  await prisma.checkin.deleteMany()
+  await prisma.histoire.deleteMany()
+  await prisma.recompense.deleteMany()
+  await prisma.tampon.deleteMany()
+  await prisma.chapitre.deleteMany()
+  await prisma.restaurant.deleteMany()
+  console.log('✅ Base nettoyée')
+
   const restaurants = await prisma.restaurant.createMany({
     data: [
       {
@@ -233,50 +246,50 @@ async function main() {
       },
 
       {
-        name: "Le Meurice",
-        address: "228 Rue de Rivoli, 75001 Paris",
-        lat: 48.8651,
-        lng: 2.3281,
-        michelinType: "hotel",
-        stars: 5,
-        budget: "high",
-        cuisine: "Française gastronomique",
-        ambiance: "Palace historique",
-        photoUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-        description: "Palace mythique face aux Tuileries, restaurant gastronomique par Alain Ducasse.",
+        name: "Septime",
+        address: "80 Rue de Charonne, 75011 Paris",
+        lat: 48.8531,
+        lng: 2.3818,
+        michelinType: "etoile_1",
+        stars: 1,
+        budget: "medium",
+        cuisine: "Française créative",
+        ambiance: "Décontracté et branché",
+        photoUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800",
+        description: "Bertrand Grébaut propose une cuisine d'auteur inventive dans un cadre décontracté du 11e.",
+        isEco: true,
+        isHiddenGem: false,
+        isVisual: true,
+      },
+      {
+        name: "Le Baratin",
+        address: "3 Rue Jouye-Rouve, 75020 Paris",
+        lat: 48.8712,
+        lng: 2.3858,
+        michelinType: "bib",
+        stars: 0,
+        budget: "low",
+        cuisine: "Bistrot naturel",
+        ambiance: "Populaire et authentique",
+        photoUrl: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800",
+        description: "Institution bellevilloise, Raquel Carena y sert une cuisine franche et des vins nature.",
+        isEco: true,
+        isHiddenGem: true,
+        isVisual: false,
+      },
+      {
+        name: "Clown Bar",
+        address: "114 Rue Amelot, 75011 Paris",
+        lat: 48.8639,
+        lng: 2.3685,
+        michelinType: "bib",
+        stars: 0,
+        budget: "medium",
+        cuisine: "Néo-bistrot créatif",
+        ambiance: "Décalé et artistique",
+        photoUrl: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800",
+        description: "Ancien bar du Cirque d'Hiver, cuisine inventive dans un décor classé de céramiques de clowns.",
         isEco: false,
-        isHiddenGem: false,
-        isVisual: true,
-      },
-      {
-        name: "Hôtel Plaza Athénée",
-        address: "25 Avenue Montaigne, 75008 Paris",
-        lat: 48.8660,
-        lng: 2.3037,
-        michelinType: "hotel",
-        stars: 5,
-        budget: "high",
-        cuisine: "Naturalité",
-        ambiance: "Glamour parisien",
-        photoUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
-        description: "L'adresse iconique de l'avenue Montaigne, terrasse rouge légendaire.",
-        isEco: true,
-        isHiddenGem: false,
-        isVisual: true,
-      },
-      {
-        name: "Hôtel Brach",
-        address: "1-7 Rue Jean Richepin, 75016 Paris",
-        lat: 48.8630,
-        lng: 2.2720,
-        michelinType: "hotel",
-        stars: 5,
-        budget: "high",
-        cuisine: "Méditerranéenne",
-        ambiance: "Design contemporain",
-        photoUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-        description: "Hôtel design signé Philippe Starck, rooftop avec vue sur tout Paris.",
-        isEco: true,
         isHiddenGem: true,
         isVisual: true,
       },
@@ -381,7 +394,7 @@ async function main() {
       restaurantId: chapitre1Restaurants[1]!.id,
       titre: 'La vengeance de la pomme de terre',
       contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
-      imageCarteUrl: '/images/histoire-pommeterre.png',
+      imageCarteUrl: '/images/pommedeterre.jpg',
       ordre: 2,
     },
     {
@@ -389,7 +402,7 @@ async function main() {
       restaurantId: chapitre1Restaurants[2]!.id,
       titre: 'Le premier \"restau\" de l\'histoire',
       contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
-      imageCarteUrl: '/images/histoire-restaurant.png',
+      imageCarteUrl: '/images/histoire-restaurant.jpg',
       ordre: 3,
     },
     // Dossier 2 (mêmes histoires dupliquées)
@@ -406,7 +419,7 @@ async function main() {
       restaurantId: chapitre2Restaurants[1]!.id,
       titre: 'La vengeance de la pomme de terre',
       contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
-      imageCarteUrl: '/images/histoire-pommeterre.png',
+      imageCarteUrl: '/images/pommedeterre.jpg',
       ordre: 2,
     },
     {
@@ -414,7 +427,7 @@ async function main() {
       restaurantId: chapitre2Restaurants[2]!.id,
       titre: 'Le premier \"restau\" de l\'histoire',
       contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
-      imageCarteUrl: '/images/histoire-restaurant.png',
+      imageCarteUrl: '/images/histoire-restaurant.jpg',
       ordre: 3,
     },
     // Dossier 3 (mêmes histoires dupliquées)
@@ -431,7 +444,7 @@ async function main() {
       restaurantId: chapitre3Restaurants[1]!.id,
       titre: 'La vengeance de la pomme de terre',
       contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
-      imageCarteUrl: '/images/histoire-pommeterre.png',
+      imageCarteUrl: '/images/pommedeterre.jpg',
       ordre: 2,
     },
     {

@@ -37,17 +37,21 @@ export default defineEventHandler(async (event) => {
   return chapitres.map((chapitre) => {
     const histoires = chapitre.histoires.map((histoire) => {
       const unlockedData = histoire.userHistoires[0]
+      // For demo: first story of each dossier is always unlocked
+      const isFirstStory = histoire.ordre === 1
+      const isUnlocked = Boolean(unlockedData) || isFirstStory
 
       return {
         id: histoire.id,
         ordre: histoire.ordre,
         titre: histoire.titre,
+        contenu: histoire.contenu,
         imageCarteUrl: histoire.imageCarteUrl,
         restaurant: {
           id: histoire.restaurant.id,
           name: histoire.restaurant.name,
         },
-        unlocked: Boolean(unlockedData),
+        unlocked: isUnlocked,
         unlockedAt: unlockedData?.unlockedAt ?? null,
       }
     })

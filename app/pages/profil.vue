@@ -23,7 +23,8 @@
     <section class="user-info-section">
       <div class="profile-main">
         <div class="avatar-container">
-          <img :src="displayAvatarUrl" :alt="`Photo de ${displayUsername}`" class="avatar-img" />
+          <svg v-if="!form.avatarUrl" class="avatar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BA0B2F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <img v-else :src="form.avatarUrl" :alt="`Photo de ${displayUsername}`" class="avatar-img" />
         </div>
         <div class="user-details">
           <h2 class="serif-italic">{{ displayUsername }}</h2>
@@ -277,7 +278,7 @@ type RestaurantOption = {
 const badgeBaguette = '/images/badgebaguette.png'
 const badgeCroissant = '/images/badgecroissant.png'
 const badgeEiffel = '/images/badgeeiffel.png'
-const fallbackAvatarUrl = 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80'
+const fallbackAvatarUrl = 'https://ui-avatars.com/api/?name=M+P&background=F4F1EA&color=BA0B2F&size=200&font-size=0.4&bold=true&rounded=true'
 const defaultPhonePlaceholder = '+33 7 68 45 23 12'
 const maxPreferredFilters = 10
 const maxFavoriteRestaurants = 5
@@ -627,17 +628,28 @@ onMounted(() => {
 
 .profile-main {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
 .avatar-container {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: 2px solid white;
   overflow: hidden;
   flex-shrink: 0;
+  background: #F4F1EA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-icon {
+  width: 44px;
+  height: 44px;
 }
 
 .avatar-img {
@@ -650,11 +662,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
+  flex: 1;
 }
 
 .user-details h2 {
-  font-size: 2rem;
-  margin-bottom: 4px;
+  font-size: 1.6rem;
+  margin-bottom: 2px;
 }
 
 .user-email,

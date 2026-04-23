@@ -82,8 +82,8 @@ const storyTransitionName = ref('slide-forward')
 
 const storyImages = [
   '/images/histoire-fourchette.png',
-  '/images/histoire-pommeterre.png',
-  '/images/histoire-restaurant.png'
+  '/images/pommedeterre.jpg',
+  '/images/histoire-restaurant.jpg'
 ]
 
 const storyYears = ['1533', '1785', '1765']
