@@ -60,6 +60,7 @@ export function computePasseportPlacement(existingTamponCount: number): {
 export type UnlockedChapitreReward = {
   id: number
   chapitreId: number
+  chapitreOrdre: number
   chapitreTitre: string
   titre: string
   description: string
@@ -67,10 +68,89 @@ export type UnlockedChapitreReward = {
   isUsed: boolean
 }
 
+export type UnlockedCheckinHistoire = {
+  id: number
+  chapitreId: number
+  chapitreOrdre: number
+  chapitreTitre: string
+  ordre: number
+  restaurantId: number
+  restaurantName: string
+  titre: string
+  contenu: string
+  imageCarteUrl: string | null
+  unlockedAt: Date
+}
+
+const CHAPITRE_REWARD_PRESETS: Record<number, { titre: string; description: string }> = {
+  1: {
+    titre: 'Dessert offert',
+    description: 'Chapitre Les Origines complete : un dessert offert.',
+  },
+  2: {
+    titre: 'Cocktail offert',
+    description: 'Chapitre Les Inspecteurs complete : un cocktail offert.',
+  },
+  3: {
+    titre: 'Coupon -75%',
+    description: 'Chapitre Les Etoiles complete : un coupon de reduction de 75%.',
+  },
+}
+
+export function getChapitreRewardContent(chapitreOrdre: number, chapitreTitre: string) {
+  return (
+    CHAPITRE_REWARD_PRESETS[chapitreOrdre] ?? {
+      titre: `Recompense du chapitre ${chapitreOrdre}`,
+      description: `Chapitre ${chapitreTitre} complete : recompense debloquee.`,
+    }
+  )
+}
+
+export async function unlockNextHistoireForCheckin(
+  userId: number
+): Promise<UnlockedCheckinHistoire | null> {
+  const nextHistoire = await prisma.histoire.findFirst({
+    where: {
+      userHistoires: {
+        none: { userId },
+      },
+    },
+    include: {
+      chapitre: true,
+      restaurant: true,
+    },
+    orderBy: [{ chapitre: { ordre: 'asc' } }, { ordre: 'asc' }],
+  })
+
+  if (!nextHistoire) {
+    return null
+  }
+
+  const unlockedHistoire = await prisma.userHistoire.create({
+    data: {
+      userId,
+      histoireId: nextHistoire.id,
+    },
+  })
+
+  return {
+    id: nextHistoire.id,
+    chapitreId: nextHistoire.chapitreId,
+    chapitreOrdre: nextHistoire.chapitre.ordre,
+    chapitreTitre: nextHistoire.chapitre.titre,
+    ordre: nextHistoire.ordre,
+    restaurantId: nextHistoire.restaurantId,
+    restaurantName: nextHistoire.restaurant.name,
+    titre: nextHistoire.titre,
+    contenu: nextHistoire.contenu,
+    imageCarteUrl: nextHistoire.imageCarteUrl,
+    unlockedAt: unlockedHistoire.unlockedAt,
+  }
+}
+
 export async function unlockChapitreRewardIfComplete(
   userId: number,
-  chapitreId: number,
-  chapitreTitre: string
+  chapitreId: number
 ): Promise<UnlockedChapitreReward | null> {
   const totalHistoiresInChapter = await prisma.histoire.count({
     where: { chapitreId },
@@ -95,6 +175,9 @@ export async function unlockChapitreRewardIfComplete(
 
   const chapitreRecompense = await prisma.recompense.findUnique({
     where: { chapitreId },
+    include: {
+      chapitre: true,
+    },
   })
 
   if (!chapitreRecompense) {
@@ -121,12 +204,18 @@ export async function unlockChapitreRewardIfComplete(
     },
   })
 
+  const rewardContent = getChapitreRewardContent(
+    chapitreRecompense.chapitre.ordre,
+    chapitreRecompense.chapitre.titre
+  )
+
   return {
     id: chapitreRecompense.id,
     chapitreId: chapitreRecompense.chapitreId,
-    chapitreTitre,
-    titre: chapitreRecompense.titre,
-    description: chapitreRecompense.description,
+    chapitreOrdre: chapitreRecompense.chapitre.ordre,
+    chapitreTitre: chapitreRecompense.chapitre.titre,
+    titre: rewardContent.titre,
+    description: rewardContent.description,
     unlockedAt: userReward.unlockedAt,
     isUsed: userReward.isUsed,
   }

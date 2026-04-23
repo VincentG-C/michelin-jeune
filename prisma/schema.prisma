@@ -7,15 +7,20 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  username  String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id                    Int      @id @default(autoincrement())
+  email                 String   @unique
+  password              String
+  username              String   @unique
+  phone                 String?
+  bio                   String?
+  avatarUrl             String?  @map("avatar_url")
+  preferredFilters      String[] @default([]) @map("preferred_filters")
+  favoriteRestaurantIds Int[]    @default([]) @map("favorite_restaurant_ids")
+  createdAt             DateTime @default(now()) @map("created_at")
 
-  checkins      Checkin[]
-  userTampons   UserTampon[]
-  userHistoires UserHistoire[]
+  checkins         Checkin[]
+  userTampons      UserTampon[]
+  userHistoires    UserHistoire[]
   userRecompenses UserRecompense[]
 
   @@map("users")

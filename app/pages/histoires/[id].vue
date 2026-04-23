@@ -31,7 +31,7 @@
     </div>
 
     <div v-if="chapitre && chapitre.histoires.length > 0" class="story-container">
-      <transition name="slide" mode="out-in">
+      <transition :name="storyTransitionName" mode="out-in">
         <div :key="currentHistoireIndex" class="story-card">
           <div class="story-image">
             <img v-if="currentHistoire.unlocked" :src="currentHistoire.imageCarteUrl || 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=600&q=80'" :alt="currentHistoire.titre" />
@@ -84,6 +84,7 @@ const router = useRouter()
 const chapitre = ref(null)
 const currentHistoireIndex = ref(0)
 const allChapitres = ref([])
+const storyTransitionName = ref('slide-forward')
 
 const currentHistoire = computed(() => {
   if (!chapitre.value || !chapitre.value.histoires.length) return null
@@ -114,12 +115,14 @@ const nextChapitre = () => {
 
 const nextHistoire = () => {
   if (currentHistoireIndex.value < chapitre.value.histoires.length - 1) {
+    storyTransitionName.value = 'slide-forward'
     currentHistoireIndex.value++
   }
 }
 
 const prevHistoire = () => {
   if (currentHistoireIndex.value > 0) {
+    storyTransitionName.value = 'slide-backward'
     currentHistoireIndex.value--
   }
 }
@@ -147,6 +150,7 @@ watch(() => route.params.id, (newId) => {
   if (newId && allChapitres.value.length) {
     chapitre.value = allChapitres.value.find(c => c.id === parseInt(newId))
     currentHistoireIndex.value = 0
+    storyTransitionName.value = 'slide-forward'
   }
 })
 </script>
@@ -234,7 +238,30 @@ watch(() => route.params.id, (newId) => {
 .loading-state { text-align: center; padding: 40px; color: rgba(255,255,255,0.6); }
 
 /* Animations */
-.slide-enter-active, .slide-leave-active { transition: all 0.4s ease; }
-.slide-enter-from { transform: translateX(100%); opacity: 0; }
-.slide-leave-to { transform: translateX(-100%); opacity: 0; }
+.slide-forward-enter-active,
+.slide-forward-leave-active,
+.slide-backward-enter-active,
+.slide-backward-leave-active {
+  transition: all 0.4s ease;
+}
+
+.slide-forward-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-forward-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-backward-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-backward-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
 </style>

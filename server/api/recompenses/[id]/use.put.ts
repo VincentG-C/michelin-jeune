@@ -1,5 +1,6 @@
 import { prisma } from '~~/server/utils/db'
 import { getUserIdFromEvent } from '~~/server/utils/auth'
+import { getChapitreRewardContent } from '~~/server/utils/checkin'
 
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
@@ -54,13 +55,18 @@ export default defineEventHandler(async (event) => {
     },
   })
 
+  const rewardContent = getChapitreRewardContent(
+    usedRecompense.recompense.chapitre.ordre,
+    usedRecompense.recompense.chapitre.titre
+  )
+
   return {
     id: usedRecompense.recompense.id,
     chapitreId: usedRecompense.recompense.chapitreId,
     chapitreTitre: usedRecompense.recompense.chapitre.titre,
     chapitreOrdre: usedRecompense.recompense.chapitre.ordre,
-    titre: usedRecompense.recompense.titre,
-    description: usedRecompense.recompense.description,
+    titre: rewardContent.titre,
+    description: rewardContent.description,
     unlockedAt: usedRecompense.unlockedAt,
     isUsed: usedRecompense.isUsed,
   }

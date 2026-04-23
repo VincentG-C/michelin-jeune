@@ -4,21 +4,11 @@ import {
   computePasseportPlacement,
   getDistanceInMeters,
   getTamponColor,
+  unlockNextHistoireForCheckin,
   unlockChapitreRewardIfComplete,
 } from '~~/server/utils/checkin'
 
-const CHECKIN_RADIUS_METERS = 1400
-
-type LinkedHistoire = {
-  id: number
-  chapitreId: number
-  chapitreTitre: string
-  restaurantId: number
-  ordre: number
-  titre: string
-  contenu: string
-  imageCarteUrl: string | null
-}
+const CHECKIN_RADIUS_METERS = 6000
 
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
@@ -119,39 +109,12 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  const histoires = await prisma.$queryRaw<LinkedHistoire[]>`
-    SELECT
-      h.id,
-      h.chapitre_id AS "chapitreId",
-      c.titre AS "chapitreTitre",
-      h.restaurant_id AS "restaurantId",
-      h.ordre,
-      h.titre,
-      h.contenu,
-      h.image_carte_url AS "imageCarteUrl"
-    FROM histoires h
-    JOIN chapitres c ON c.id = h.chapitre_id
-    WHERE h.restaurant_id = ${restaurantId}
-    LIMIT 1
-  `
-
-  const histoire = histoires[0] ?? null
-
-  let histoireDebloquee: {
-    id: number
-    chapitreId: number
-    chapitreTitre: string
-    ordre: number
-    restaurantId: number
-    titre: string
-    contenu: string
-    imageCarteUrl: string | null
-    unlockedAt: Date
-  } | null = null
+  const histoireDebloquee = await unlockNextHistoireForCheckin(userId)
 
   let recompenseDebloquee: {
     id: number
     chapitreId: number
+    chapitreOrdre: number
     chapitreTitre: string
     titre: string
     description: string
@@ -159,64 +122,31 @@ export default defineEventHandler(async (event) => {
     isUsed: boolean
   } | null = null
 
-  if (histoire) {
-    const alreadyUnlockedHistoire = await prisma.userHistoire.findUnique({
-      where: {
-        userId_histoireId: {
-          userId,
-          histoireId: histoire.id,
-        },
-      },
-    })
+  if (histoireDebloquee) {
+    recompenseDebloquee = await unlockChapitreRewardIfComplete(userId, histoireDebloquee.chapitreId)
+  }
 
-    let unlockedHistoire: { unlockedAt: Date } | null = null
-
-    if (!alreadyUnlockedHistoire) {
-      unlockedHistoire = await prisma.userHistoire.create({
-        data: {
-          userId,
-          histoireId: histoire.id,
-        },
-      })
-    }
-
-    if (unlockedHistoire) {
-      histoireDebloquee = {
-        id: histoire.id,
-        chapitreId: histoire.chapitreId,
-        chapitreTitre: histoire.chapitreTitre,
-        ordre: histoire.ordre,
-        restaurantId: histoire.restaurantId,
-        titre: histoire.titre,
-        contenu: histoire.contenu,
-        imageCarteUrl: histoire.imageCarteUrl,
-        unlockedAt: unlockedHistoire.unlockedAt,
-      }
-    }
-
-    recompenseDebloquee = await unlockChapitreRewardIfComplete(
-      userId,
-      histoire.chapitreId,
-      histoire.chapitreTitre
-    )
+  const nouveauTampon = {
+    id: collectedTampon.id,
+    tamponId: collectedTampon.tamponId,
+    restaurantId: collectedTampon.tampon.restaurantId,
+    restaurantName: collectedTampon.tampon.restaurant.name,
+    imageUrl: collectedTampon.tampon.imageUrl,
+    color: collectedTampon.tampon.color,
+    pageNumber: collectedTampon.pageNumber,
+    positionX: collectedTampon.positionX,
+    positionY: collectedTampon.positionY,
+    collectedAt: collectedTampon.collectedAt,
   }
 
   return {
     checkin,
     distance: Math.round(distance),
-    nouveauTampon: {
-      id: collectedTampon.id,
-      tamponId: collectedTampon.tamponId,
-      restaurantId: collectedTampon.tampon.restaurantId,
-      restaurantName: collectedTampon.tampon.restaurant.name,
-      imageUrl: collectedTampon.tampon.imageUrl,
-      color: collectedTampon.tampon.color,
-      pageNumber: collectedTampon.pageNumber,
-      positionX: collectedTampon.positionX,
-      positionY: collectedTampon.positionY,
-      collectedAt: collectedTampon.collectedAt,
-    },
+    nouveauTampon,
+    newTampons: [nouveauTampon],
     histoireDebloquee,
+    unlockedHistoires: histoireDebloquee ? [histoireDebloquee] : [],
     recompenseDebloquee,
+    unlockedRewards: recompenseDebloquee ? [recompenseDebloquee] : [],
   }
 })

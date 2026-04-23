@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
   const chapitreComplet = totalHistoiresInChapter > 0 && unlockedHistoiresInChapter >= totalHistoiresInChapter
 
   const recompenseDebloquee = chapitreComplet
-    ? await unlockChapitreRewardIfComplete(userId, histoire.chapitreId, histoire.chapitre.titre)
+    ? await unlockChapitreRewardIfComplete(userId, histoire.chapitreId)
     : null
 
   return {

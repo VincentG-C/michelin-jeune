@@ -353,6 +353,9 @@ const checkIn = async () => {
         if (res.histoireDebloquee) {
           checkinSuccess.value += ` Histoire débloquée : "${res.histoireDebloquee.titre}"`
         }
+        if (res.recompenseDebloquee) {
+          checkinSuccess.value += ` Cadeau dÃ©bloquÃ© : "${res.recompenseDebloquee.titre}"`
+        }
         selectedRestaurant.value = null
 
         setTimeout(() => { checkinSuccess.value = '' }, 4000)
