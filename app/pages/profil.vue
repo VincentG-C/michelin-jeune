@@ -51,15 +51,21 @@
           
           <div class="tampons-grid">
             <div class="tampon-wrapper" style="transform: rotate(-5deg) translate(10px, 10px);">
-              <img src="/tampons/tampon-bistrot-des-fables.png" alt="Bistrot des Fables" @error="handleImgError" class="fallback-tampon red" />
+              <div class="tampon-circle red">
+                <span class="tampon-text">Bistrot<br>des Fables</span>
+              </div>
             </div>
             
             <div class="tampon-wrapper" style="transform: rotate(8deg) translate(-5px, 20px);">
-              <img src="/tampons/tampon-table-de-mee.png" alt="Table de Mee" @error="handleImgError" class="fallback-tampon green" />
+              <div class="tampon-circle green">
+                <span class="tampon-text">Table<br>de Mee</span>
+              </div>
             </div>
             
             <div class="tampon-wrapper" style="transform: rotate(-12deg) translate(15px, -5px);">
-              <img src="/tampons/tampon-cloche-dor.png" alt="La Cloche d'Or" @error="handleImgError" class="fallback-tampon blue" />
+              <div class="tampon-circle blue">
+                <span class="tampon-text">Cloche<br>d'Or</span>
+              </div>
             </div>
             
             <div class="tampon-wrapper locked">
@@ -78,13 +84,6 @@ const router = useRouter()
 const logout = () => {
   localStorage.removeItem('token')
   router.push('/login')
-}
-
-// Fallback if the PNG from designers isn't found
-const handleImgError = (e) => {
-  e.target.style.display = 'none'
-  e.target.parentElement.classList.add('fallback-mode')
-  e.target.parentElement.innerHTML = '<div class="fake-tampon">M</div>'
 }
 </script>
 
@@ -279,12 +278,29 @@ const handleImgError = (e) => {
   position: relative;
 }
 
-.tampon-wrapper img {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  opacity: 0.9;
+.tampon-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 4px double currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
   mix-blend-mode: multiply;
+}
+
+.tampon-circle.red { color: var(--color-michelin-red); }
+.tampon-circle.green { color: #2e8b57; }
+.tampon-circle.blue { color: #4169e1; }
+
+.tampon-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .tampon-wrapper.locked {
@@ -296,23 +312,4 @@ const handleImgError = (e) => {
   margin: auto;
   color: rgba(0,0,0,0.2);
 }
-
-/* Fallback styles if image missing */
-.fake-tampon {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 4px solid var(--color-michelin-red);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-size: 3rem;
-  color: var(--color-michelin-red);
-  opacity: 0.8;
-  mix-blend-mode: multiply;
-}
-
-.fallback-mode:nth-child(2) .fake-tampon { border-color: #2e8b57; color: #2e8b57; }
-.fallback-mode:nth-child(3) .fake-tampon { border-color: #4169e1; color: #4169e1; }
 </style>

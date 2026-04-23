@@ -28,4 +28,4 @@ RUN npm install -g prisma
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "prisma migrate deploy && node .output/server/index.mjs"]
+CMD ["sh", "-c", "prisma db push --accept-data-loss && node .output/server/index.mjs"]
