@@ -7,7 +7,7 @@ import {
   unlockChapitreRewardIfComplete,
 } from '~~/server/utils/checkin'
 
-const CHECKIN_RADIUS_METERS = 200
+const CHECKIN_RADIUS_METERS = 1400
 
 type LinkedHistoire = {
   id: number

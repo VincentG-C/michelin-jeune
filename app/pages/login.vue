@@ -21,8 +21,8 @@
         
         <div class="auth-header">
           <h1 class="auth-title">S'inscrire ou se connecter</h1>
-          <!-- Asset attendu : squiggle-line.svg -->
-          <img src="/images/squiggle-line.svg" alt="" class="squiggly-line" v-if="assetsLoaded" />
+          <!-- Asset attendu : squiggle-line.png -->
+          <img src="/images/squiggle-line.png" alt="" class="squiggly-line" v-if="assetsLoaded" />
           <div v-else class="placeholder-line"></div>
         </div>
 
@@ -73,7 +73,7 @@
           </div>
 
           <!-- REGISTER MODE -->
-          <div v-if="mode === 'register'" class="register-view" key="register">
+          <div v-else-if="mode === 'register'" class="register-view" key="register">
             <form @submit.prevent="handleRegister" class="register-form">
               <div class="input-group">
                 <label>Prénom</label>
@@ -106,7 +106,7 @@
           </div>
 
           <!-- LOGIN MODE -->
-          <div v-if="mode === 'login'" class="register-view" key="login">
+          <div v-else-if="mode === 'login'" class="register-view" key="login">
             <form @submit.prevent="handleLogin" class="register-form">
               <div class="input-group">
                 <label>Email</label>
@@ -198,6 +198,7 @@ const handleRegister = async () => {
       body: {
         email: form.value.email,
         password: form.value.password,
+        username: `${form.value.firstname} ${form.value.lastname}`.trim(),
         firstname: form.value.firstname,
         lastname: form.value.lastname
       }

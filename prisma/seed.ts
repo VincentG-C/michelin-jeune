@@ -48,7 +48,7 @@ async function main() {
         budget: "high",
         cuisine: "Française moderne",
         ambiance: "Luxueux et raffiné",
-        photoUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb51f3a?w=800",
+        photoUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800",
         description: "Restaurant gastronomique du Four Seasons Hotel George V, une expérience culinaire d'exception.",
         isEco: false,
         isHiddenGem: false,
