@@ -14,24 +14,45 @@
     <!-- Filters Panel -->
     <transition name="slide-down">
       <div v-if="showFilters" class="filters-panel">
+        <h2 class="filters-title serif-italic">Filtres</h2>
+
         <div class="filter-group">
-          <h3>Type Michelin</h3>
+          <h3>Vibe & Mood</h3>
           <div class="filter-chips">
-            <button :class="['chip', { active: activeFilter.michelin === 'bib' }]" @click="toggleFilter('michelin', 'bib')">Bib Gourmand</button>
-            <button :class="['chip', { active: activeFilter.michelin === 'etoile_1' }]" @click="toggleFilter('michelin', 'etoile_1')">1 Étoile ⭐</button>
-            <button :class="['chip', { active: activeFilter.michelin === 'etoile_2' }]" @click="toggleFilter('michelin', 'etoile_2')">2 Étoiles ⭐⭐</button>
-            <button :class="['chip', { active: activeFilter.michelin === 'etoile_3' }]" @click="toggleFilter('michelin', 'etoile_3')">3 Étoiles ⭐⭐⭐</button>
+            <button :class="['chip', { active: activeFilter.vibe === 'visual' }]" @click="toggleFilter('vibe', 'visual')">Afterwork</button>
+            <button :class="['chip', { active: activeFilter.vibe === 'eco' }]" @click="toggleFilter('vibe', 'eco')">Chef en action</button>
+            <button :class="['chip', { active: activeFilter.vibe === 'hidden_gem' }]" @click="toggleFilter('vibe', 'hidden_gem')">Date night</button>
+            <button class="chip chip-add" @click="">+</button>
           </div>
         </div>
+
         <div class="filter-group">
-          <h3>Ambiance</h3>
+          <h3>Type de cuisine</h3>
           <div class="filter-chips">
-            <button :class="['chip', { active: activeFilter.vibe === 'eco' }]" @click="toggleFilter('vibe', 'eco')">🌿 Éco</button>
-            <button :class="['chip', { active: activeFilter.vibe === 'hidden_gem' }]" @click="toggleFilter('vibe', 'hidden_gem')">💎 Pépite</button>
-            <button :class="['chip', { active: activeFilter.vibe === 'visual' }]" @click="toggleFilter('vibe', 'visual')">📸 Visuel</button>
+            <button :class="['chip', { active: activeFilter.cuisine === 'asiatique' }]" @click="toggleFilter('cuisine', 'asiatique')">Asiatique</button>
+            <button :class="['chip', { active: activeFilter.cuisine === 'cantonais' }]" @click="toggleFilter('cuisine', 'cantonais')">Cantonais</button>
+            <button :class="['chip', { active: activeFilter.cuisine === 'chinoise' }]" @click="toggleFilter('cuisine', 'chinoise')">Chinoise</button>
+            <button class="chip chip-add" @click="">+</button>
           </div>
         </div>
-        <button class="reset-filters" @click="resetFilters">Réinitialiser les filtres</button>
+
+        <div class="filter-group">
+          <h3>Régimes spécifiques</h3>
+          <div class="filter-chips">
+            <button :class="['chip', { active: activeFilter.regime === 'casher' }]" @click="toggleFilter('regime', 'casher')">Option casher</button>
+            <button :class="['chip', { active: activeFilter.regime === 'halal' }]" @click="toggleFilter('regime', 'halal')">Option halal</button>
+            <button class="chip chip-add" @click="">+</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h3>Expérience Spéciale</h3>
+          <div class="filter-chips">
+            <button :class="['chip', { active: activeFilter.michelin === 'etoile_3' }]" @click="toggleFilter('michelin', 'etoile_3')">Chef's Table</button>
+            <button :class="['chip', { active: activeFilter.michelin === 'bib' }]" @click="toggleFilter('michelin', 'bib')">Secret Spot</button>
+            <button :class="['chip', { active: activeFilter.experience === 'immersif' }]" @click="toggleFilter('experience', 'immersif')">Immersif</button>
+          </div>
+        </div>
       </div>
     </transition>
 
@@ -74,21 +95,19 @@
         </button>
       </div>
       <div class="restaurant-list">
-        <div class="restaurant-card" v-for="r in filteredRestaurants" :key="r.id" @click="selectRestaurant(r); showList = false;">
+        <div class="restaurant-card" v-for="r in filteredRestaurants" :key="r.id" @click="router.push(`/restaurant/${r.id}`)">
           <div class="card-info">
             <h3 class="serif-italic">{{ r.name }}</h3>
-            <p class="address">{{ r.address }}</p>
-            <p class="cuisine-text">{{ r.cuisine || 'Cuisine française' }}</p>
+            <p class="card-city">{{ extractCity(r.address) }}</p>
+            <p class="card-cuisine">{{ r.cuisine || 'Cuisine française' }}</p>
             <div class="tags">
-              <span class="tag" v-if="r.michelinType === 'bib'">Bib Gourmand</span>
-              <span class="tag" v-else-if="r.michelinType">{{ r.stars }} ⭐</span>
-              <span class="tag eco" v-if="r.isEco">🌿 Éco</span>
-              <span class="tag gem" v-if="r.isHiddenGem">💎 Pépite</span>
-              <span class="tag visual" v-if="r.isVisual">📸 Visuel</span>
+              <span class="tag" v-if="r.isHiddenGem">Pépite cachée</span>
+              <span class="tag" v-if="r.isEco">Options véganes</span>
+              <span class="tag" v-if="r.ambiance">{{ r.ambiance }}</span>
             </div>
           </div>
           <div class="card-image">
-            <img :src="r.photoUrl || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&q=80'" :alt="r.name" />
+            <img :src="r.photoUrl || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80'" :alt="r.name" />
           </div>
         </div>
       </div>
@@ -163,7 +182,10 @@ let mapboxgl = null
 
 const activeFilter = ref({
   michelin: null,
-  vibe: null
+  vibe: null,
+  cuisine: null,
+  regime: null,
+  experience: null
 })
 
 const config = useRuntimeConfig()
@@ -203,8 +225,18 @@ const toggleFilter = (type, value) => {
   updateMarkers()
 }
 
+const extractCity = (address) => {
+  if (!address) return 'Paris'
+  const parts = address.split(',')
+  if (parts.length >= 2) {
+    const city = parts[parts.length - 1].trim().replace(/\d{5}\s*/, '')
+    return city || 'Paris'
+  }
+  return 'Paris'
+}
+
 const resetFilters = () => {
-  activeFilter.value = { michelin: null, vibe: null }
+  activeFilter.value = { michelin: null, vibe: null, cuisine: null, regime: null, experience: null }
   searchQuery.value = ''
   showFilters.value = false
   updateMarkers()
@@ -436,29 +468,39 @@ const checkIn = async () => {
 /* Filters Panel */
 .filters-panel {
   position: fixed;
-  top: 80px;
+  top: calc(env(safe-area-inset-top, 24px) + 100px);
   left: 16px;
   right: 16px;
-  background: var(--color-white);
+  background: #F4F1EA;
   border-radius: 20px;
-  padding: 20px;
+  padding: 24px 20px;
   z-index: 55;
   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.filters-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.6rem;
+  color: var(--color-dark);
+  margin-bottom: 16px;
 }
 
 .filter-group { margin-bottom: 16px; }
-.filter-group h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 10px; color: var(--color-dark); }
+.filter-group h3 { font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: var(--color-dark); }
 .filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
-  padding: 8px 14px; border-radius: 20px; font-size: 0.8rem;
-  background: var(--color-gray); color: var(--color-dark); border: none;
-  transition: all 0.2s;
+  padding: 8px 16px; border-radius: 20px; font-size: 0.8rem;
+  background: transparent; color: var(--color-dark);
+  border: 1.5px solid #BA0B2F;
+  transition: all 0.2s; cursor: pointer;
 }
-.chip.active { background: var(--color-michelin-red); color: white; }
-.reset-filters {
-  width: 100%; padding: 10px; background: transparent;
-  color: var(--color-michelin-red); font-weight: 600; font-size: 0.9rem;
-  border: 1px solid var(--color-michelin-red); border-radius: 12px;
+.chip.active { background: #BA0B2F; color: white; }
+.chip-add {
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  padding: 0; font-size: 1.1rem; font-weight: 500;
 }
 
 .map-container {
@@ -534,26 +576,28 @@ const checkIn = async () => {
 .restaurant-list { display: flex; flex-direction: column; gap: 16px; }
 
 .restaurant-card {
-  display: flex; background: var(--color-white); border-radius: 16px;
-  box-shadow: var(--shadow-sm); border: 1px solid var(--color-gray);
+  display: flex; background: #F4F1EA; border-radius: 20px;
   overflow: hidden; cursor: pointer;
+  transition: transform 0.2s;
 }
+.restaurant-card:active { transform: scale(0.98); }
 
-.card-info { flex: 1; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
-.card-info h3 { font-size: 1.2rem; color: var(--color-michelin-red); margin-bottom: 4px; }
-.address { font-size: 0.85rem; color: var(--color-dark-gray); margin-bottom: 4px; }
-.cuisine-text { font-size: 0.8rem; color: var(--color-dark-gray); font-style: italic; margin-bottom: 8px; }
+.card-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+.card-info h3 {
+  font-size: 1.4rem; color: var(--color-dark); margin-bottom: 6px;
+  font-family: 'Playfair Display', serif; font-style: italic;
+}
+.card-city { font-size: 0.9rem; color: var(--color-dark); margin-bottom: 2px; font-weight: 500; }
+.card-cuisine { font-size: 0.85rem; color: var(--color-dark-gray); margin-bottom: 10px; }
 
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
-  font-size: 0.7rem; padding: 3px 8px; background: var(--color-creme);
-  color: var(--color-dark); border-radius: 12px; font-weight: 500;
+  font-size: 0.75rem; padding: 5px 12px; background: transparent;
+  color: var(--color-dark); border-radius: 20px; font-weight: 500;
+  border: 1px solid #BA0B2F;
 }
-.tag.eco { background: #e8f5e9; color: #2e7d32; }
-.tag.gem { background: #ede7f6; color: #5e35b1; }
-.tag.visual { background: #fff3e0; color: #e65100; }
 
-.card-image { width: 100px; min-height: 100px; }
+.card-image { width: 120px; min-height: 120px; border-radius: 16px; overflow: hidden; margin: 12px 12px 12px 0; }
 .card-image img { width: 100%; height: 100%; object-fit: cover; }
 
 /* Bottom Sheet */

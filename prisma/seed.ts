@@ -318,20 +318,20 @@ async function main() {
 
   const chapitre1 = await prisma.chapitre.upsert({
     where: { ordre: 1 },
-    update: { titre: 'Les Origines' },
-    create: { titre: 'Les Origines', ordre: 1 },
+    update: { titre: 'Dossier N°1' },
+    create: { titre: 'Dossier N°1', ordre: 1 },
   })
 
   const chapitre2 = await prisma.chapitre.upsert({
     where: { ordre: 2 },
-    update: { titre: 'Les Inspecteurs' },
-    create: { titre: 'Les Inspecteurs', ordre: 2 },
+    update: { titre: 'Dossier N°2' },
+    create: { titre: 'Dossier N°2', ordre: 2 },
   })
 
   const chapitre3 = await prisma.chapitre.upsert({
     where: { ordre: 3 },
-    update: { titre: 'Les Étoiles' },
-    create: { titre: 'Les Étoiles', ordre: 3 },
+    update: { titre: 'Dossier N°3' },
+    create: { titre: 'Dossier N°3', ordre: 3 },
   })
 
   const orderedRestaurants = [...allRestaurants].sort((a, b) => a.id - b.id)
@@ -367,76 +367,79 @@ async function main() {
   }
 
   const histoiresData = [
+    // Dossier 1
     {
       chapitreId: chapitre1.id,
       restaurantId: chapitre1Restaurants[0]!.id,
-      titre: 'Le Carnet Rouge de 1900',
-      contenu: 'Le premier guide Michelin nait pour aider les automobilistes a voyager et bien manger. Il marque le debut de la legende gastronomique.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1585540083814-ea6ee8af9e4f?w=800',
+      titre: 'Le crime de la fourchette',
+      contenu: "Tu penses que la France a inventé les bonnes manières ? Pas du tout. Jusqu'en **1533**, les Français les plus chics mangeaient avec leurs **doigts** et s'essuyaient sur la nappe. C'est **Catherine de Médicis** qui débarque d'Italie avec un objet jugé \"scandaleux\" à l'époque : la fourchette.",
+      imageCarteUrl: '/images/histoire-fourchette.png',
       ordre: 1,
     },
     {
       chapitreId: chapitre1.id,
       restaurantId: chapitre1Restaurants[1]!.id,
-      titre: 'Les Premiers Itineraires Gourmands',
-      contenu: 'Les routes du guide relient les villes et les tables remarquables. Le voyage culinaire devient une aventure en soi.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800',
+      titre: 'La vengeance de la pomme de terre',
+      contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
+      imageCarteUrl: '/images/histoire-pommeterre.png',
       ordre: 2,
     },
     {
       chapitreId: chapitre1.id,
       restaurantId: chapitre1Restaurants[2]!.id,
-      titre: 'L Heritage des Origines',
-      contenu: 'Des premiers garages aux grandes tables, Michelin construit une culture du gout qui inspire encore aujourd hui.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1495461199391-8c39ab674581?w=800',
+      titre: 'Le premier \"restau\" de l\'histoire',
+      contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
+      imageCarteUrl: '/images/histoire-restaurant.png',
       ordre: 3,
     },
+    // Dossier 2 (mêmes histoires dupliquées)
     {
       chapitreId: chapitre2.id,
       restaurantId: chapitre2Restaurants[0]!.id,
-      titre: 'L Anonymat des Inspecteurs',
-      contenu: 'Les inspecteurs Michelin evaluent chaque adresse anonymement pour garantir une lecture juste et independante.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=800',
+      titre: 'Le crime de la fourchette',
+      contenu: "Tu penses que la France a inventé les bonnes manières ? Pas du tout. Jusqu'en **1533**, les Français les plus chics mangeaient avec leurs **doigts** et s'essuyaient sur la nappe. C'est **Catherine de Médicis** qui débarque d'Italie avec un objet jugé \"scandaleux\" à l'époque : la fourchette.",
+      imageCarteUrl: '/images/histoire-fourchette.png',
       ordre: 1,
     },
     {
       chapitreId: chapitre2.id,
       restaurantId: chapitre2Restaurants[1]!.id,
-      titre: 'La Rigueur des Visites',
-      contenu: 'Une meme table est visitee plusieurs fois afin de verifier constance, technique et personnalite culinaire.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
+      titre: 'La vengeance de la pomme de terre',
+      contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
+      imageCarteUrl: '/images/histoire-pommeterre.png',
       ordre: 2,
     },
     {
       chapitreId: chapitre2.id,
       restaurantId: chapitre2Restaurants[2]!.id,
-      titre: 'Une Note Qui Compte',
-      contenu: 'Chaque detail de service et d assiette participe a la recommandation finale, devenue reference mondiale.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=800',
+      titre: 'Le premier \"restau\" de l\'histoire',
+      contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
+      imageCarteUrl: '/images/histoire-restaurant.png',
       ordre: 3,
     },
+    // Dossier 3 (mêmes histoires dupliquées)
     {
       chapitreId: chapitre3.id,
       restaurantId: chapitre3Restaurants[0]!.id,
-      titre: 'La Premiere Etoile',
-      contenu: 'Une etoile signale une tres bonne table. C est le debut d une reconnaissance exigeante et recherchee.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800',
+      titre: 'Le crime de la fourchette',
+      contenu: "Tu penses que la France a inventé les bonnes manières ? Pas du tout. Jusqu'en **1533**, les Français les plus chics mangeaient avec leurs **doigts** et s'essuyaient sur la nappe. C'est **Catherine de Médicis** qui débarque d'Italie avec un objet jugé \"scandaleux\" à l'époque : la fourchette.",
+      imageCarteUrl: '/images/histoire-fourchette.png',
       ordre: 1,
     },
     {
       chapitreId: chapitre3.id,
       restaurantId: chapitre3Restaurants[1]!.id,
-      titre: 'Deux Etoiles et le Detour',
-      contenu: 'Deux etoiles racontent une cuisine d exception qui merite de changer de route pour la decouvrir.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
+      titre: 'La vengeance de la pomme de terre',
+      contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
+      imageCarteUrl: '/images/histoire-pommeterre.png',
       ordre: 2,
     },
     {
       chapitreId: chapitre3.id,
       restaurantId: chapitre3Restaurants[2]!.id,
-      titre: 'Trois Etoiles, le Voyage',
-      contenu: 'Trois etoiles consacrent une destination culinaire en soi, une table qui justifie a elle seule le voyage.',
-      imageCarteUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
+      titre: 'Le premier \"restau\" de l\'histoire',
+      contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
+      imageCarteUrl: '/images/histoire-restaurant.png',
       ordre: 3,
     },
   ]
@@ -453,39 +456,39 @@ async function main() {
   const recompense1 = await prisma.recompense.upsert({
     where: { chapitreId: chapitre1.id },
     update: {
-      titre: 'Verre offert',
-      description: 'Chapitre Les Origines completé : un verre offert.',
+      titre: 'Dessert offert',
+      description: 'Dossier N°1 complété : un dessert offert dans un restaurant partenaire.',
     },
     create: {
       chapitreId: chapitre1.id,
-      titre: 'Verre offert',
-      description: 'Chapitre Les Origines completé : un verre offert.',
+      titre: 'Dessert offert',
+      description: 'Dossier N°1 complété : un dessert offert dans un restaurant partenaire.',
     },
   })
 
   const recompense2 = await prisma.recompense.upsert({
     where: { chapitreId: chapitre2.id },
     update: {
-      titre: 'Dessert offert',
-      description: 'Chapitre Les Inspecteurs completé : un dessert offert.',
+      titre: 'Entrée offerte',
+      description: 'Dossier N°2 complété : une entrée offerte dans un restaurant partenaire.',
     },
     create: {
       chapitreId: chapitre2.id,
-      titre: 'Dessert offert',
-      description: 'Chapitre Les Inspecteurs completé : un dessert offert.',
+      titre: 'Entrée offerte',
+      description: 'Dossier N°2 complété : une entrée offerte dans un restaurant partenaire.',
     },
   })
 
   const recompense3 = await prisma.recompense.upsert({
     where: { chapitreId: chapitre3.id },
     update: {
-      titre: 'Entrée offerte',
-      description: 'Chapitre Les Étoiles completé : une entrée offerte.',
+      titre: 'Café gourmand offert',
+      description: 'Dossier N°3 complété : un café gourmand offert dans un restaurant partenaire.',
     },
     create: {
       chapitreId: chapitre3.id,
-      titre: 'Entrée offerte',
-      description: 'Chapitre Les Étoiles completé : une entrée offerte.',
+      titre: 'Café gourmand offert',
+      description: 'Dossier N°3 complété : un café gourmand offert dans un restaurant partenaire.',
     },
   })
 

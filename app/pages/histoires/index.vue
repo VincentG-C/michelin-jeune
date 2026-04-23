@@ -1,47 +1,44 @@
 <template>
-  <div class="histoires-page">
+  <div class="dossiers-page">
     <div class="header">
-      <h1 class="serif-italic">L'Histoire du<br>Guide Michelin</h1>
-      <p>Collectionnez des tampons pour connaître l'histoire et obtenir des récompenses exclusives.</p>
+      <h1 class="serif-italic">Les dossiers frais</h1>
+      <svg class="squiggly-line" width="100%" height="12" viewBox="0 0 300 12" preserveAspectRatio="none">
+        <path d="M0 6C30 2 60 10 90 6C120 2 150 10 180 6C210 2 240 10 270 6C285 4 295 8 300 6" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+      </svg>
+      <p class="header-desc">Collectionner des badges pour connaitre l'histoire et obtenir des récompenses...</p>
     </div>
 
-    <div v-if="chapitres && chapitres.length > 0" class="chapitres-list">
+    <div v-if="chapitres && chapitres.length > 0" class="dossiers-list">
       <NuxtLink
-        v-for="chapitre in chapitres"
+        v-for="(chapitre, index) in chapitres"
         :key="chapitre.id"
         :to="`/histoires/${chapitre.id}`"
-        class="chapitre-card"
+        class="dossier-card"
+        :class="`dossier-${index + 1}`"
       >
-        <div class="card-content">
-          <h2 class="serif-italic">Chapitre N°{{ chapitre.ordre }}</h2>
-          <p class="chapitre-title">{{ chapitre.titre }}</p>
-          <p class="chapitre-desc">{{ chapitre.histoires.length }} histoires à débloquer</p>
-          <div class="cadenas-list">
-            <svg v-for="(h, i) in chapitre.histoires" :key="i"
-                 :class="{ 'unlocked': h.unlocked }"
-                 xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </div>
-          <div v-if="chapitre.completed" class="completed-badge">✅ Complété</div>
-          <div v-if="chapitre.recompense && chapitre.recompense.unlocked" class="reward-badge">
-            🎁 {{ chapitre.recompense.titre }}
-          </div>
+        <div class="dossier-text">
+          <h2 class="serif-italic">Dossier N°{{ chapitre.ordre }}</h2>
+          <p class="dossier-desc">{{ chapitre.histoires.length }} histoires à débloquer<br>avant une récompense.</p>
         </div>
-        <div class="card-arrow">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        <div class="dossier-image">
+          <img :src="dossierImages[index] || dossierImages[0]" :alt="`Dossier ${chapitre.ordre}`" />
         </div>
       </NuxtLink>
     </div>
     <div v-else class="loading-state">
-      <p>Chargement des chapitres...</p>
+      <p>Chargement des dossiers...</p>
     </div>
   </div>
 </template>
 
 <script setup>
 const chapitres = ref([])
+
+const dossierImages = [
+  '/images/dossier1.png',
+  '/images/dossier2.png',
+  '/images/dossier3.png'
+]
 
 onMounted(async () => {
   const token = localStorage.getItem('token')
@@ -53,55 +50,120 @@ onMounted(async () => {
     })
     chapitres.value = data
   } catch (error) {
-    console.error('Error loading chapitres:', error)
+    console.error('Error loading dossiers:', error)
   }
 })
 </script>
 
 <style scoped>
-.histoires-page {
+.dossiers-page {
   background-color: #BA0B2F;
   min-height: 100vh;
   padding: 24px 20px 100px;
-  color: var(--color-white);
-  padding-top: env(safe-area-inset-top, 24px);
+  color: white;
+  padding-top: calc(env(safe-area-inset-top, 24px) + 20px);
 }
 
-.header { margin-bottom: 32px; }
-.header h1 { font-size: 2.2rem; line-height: 1.2; margin-bottom: 12px; color: var(--color-white); }
-.header p { color: rgba(255, 255, 255, 0.8); font-size: 0.95rem; line-height: 1.5; }
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
 
-.chapitres-list { display: flex; flex-direction: column; gap: 20px; }
+.header h1 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
 
-.chapitre-card {
+.squiggly-line {
+  display: block;
+  width: 100%;
+  margin: 4px auto 12px;
+}
+
+.header-desc {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.dossiers-list {
   display: flex;
-  background-color: var(--color-creme);
-  border-radius: 16px; overflow: hidden;
-  text-decoration: none; color: var(--color-dark);
-  box-shadow: var(--shadow-md);
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dossier-card {
+  display: flex;
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--color-dark);
   transition: transform 0.2s;
+  min-height: 160px;
 }
-.chapitre-card:active { transform: scale(0.98); }
 
-.card-content {
-  flex: 1; padding: 20px;
-  display: flex; flex-direction: column; justify-content: center;
+.dossier-card:active {
+  transform: scale(0.98);
 }
-.card-content h2 { color: var(--color-michelin-red); font-size: 1.5rem; margin-bottom: 4px; }
-.chapitre-title { font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
-.chapitre-desc { font-size: 0.85rem; color: var(--color-dark-gray); margin-bottom: 12px; }
 
-.cadenas-list { display: flex; gap: 8px; margin-bottom: 8px; }
-.cadenas-list svg { color: #ccc; }
-.cadenas-list svg.unlocked { color: var(--color-gold); }
+/* Card color variants matching Figma */
+.dossier-1 {
+  background: linear-gradient(135deg, #F4E8DC 0%, #EDD9C7 100%);
+}
 
-.completed-badge { font-size: 0.8rem; font-weight: 600; color: #2e7d32; }
-.reward-badge { font-size: 0.8rem; font-weight: 600; color: #e65100; margin-top: 4px; }
+.dossier-2 {
+  background: linear-gradient(135deg, #E8B4B8 0%, #D4919A 100%);
+}
 
-.card-arrow {
-  display: flex; align-items: center; padding: 0 16px;
+.dossier-3 {
+  background: linear-gradient(135deg, #D9A0A7 0%, #C47E89 100%);
+}
+
+.dossier-text {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dossier-text h2 {
+  font-size: 1.6rem;
+  color: var(--color-dark);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.dossier-desc {
+  font-size: 0.9rem;
   color: var(--color-dark-gray);
+  line-height: 1.5;
 }
 
-.loading-state { text-align: center; padding: 40px; color: rgba(255,255,255,0.6); }
+.dossier-image {
+  width: 140px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.dossier-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.serif-italic {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 500;
+}
 </style>
