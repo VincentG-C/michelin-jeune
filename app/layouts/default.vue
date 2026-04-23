@@ -1,6 +1,8 @@
 <template>
   <div class="page-container">
-    <slot />
+    <div class="main-content">
+      <slot />
+    </div>
     
     <nav class="bottom-nav">
       <NuxtLink to="/histoires" class="nav-item" active-class="active">
@@ -8,7 +10,7 @@
         <span>Histoire</span>
       </NuxtLink>
       
-      <NuxtLink to="/" class="nav-item" active-class="active" exact-active-class="active">
+      <NuxtLink to="/map" class="nav-item" active-class="active" exact-active-class="active">
         <img src="/images/icon-map.svg" alt="Map" class="nav-icon" />
         <span>Map</span>
       </NuxtLink>
@@ -22,6 +24,17 @@
 </template>
 
 <style scoped>
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding-bottom: 100px;
+}
+
 .bottom-nav {
   position: fixed;
   bottom: 0;

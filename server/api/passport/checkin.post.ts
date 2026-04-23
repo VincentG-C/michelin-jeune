@@ -77,7 +77,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const checkin = await prisma.checkin.create({
-    data: { userId, restaurantId },
+    data: {
+      userId,
+      restaurantId,
+      checkedAt: body.visited_at ? new Date(body.visited_at) : new Date(),
+    },
     include: { restaurant: true },
   })
 
