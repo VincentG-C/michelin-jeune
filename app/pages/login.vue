@@ -6,19 +6,9 @@
       <div v-if="mode === 'splash'" class="splash-screen">
         <div class="splash-content">
           <div class="logo">
-            <svg width="120" height="120" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <!-- Outline shape for Bibendum head -->
-              <path d="M35 35 C 30 15, 70 15, 65 35 C 85 35, 90 60, 75 75 C 65 85, 35 85, 25 75 C 10 60, 15 35, 35 35 Z" />
-              <!-- Top headband line -->
-              <path d="M40 25 C 40 10, 60 10, 60 25" />
-              <!-- Eyes -->
-              <circle cx="42" cy="45" r="4" fill="white" />
-              <circle cx="58" cy="45" r="4" fill="white" />
-              <!-- Smile -->
-              <path d="M42 60 C 45 68, 55 68, 58 60" />
-              <!-- Tongue -->
-              <path d="M48 64 Q 55 74, 58 64" fill="white" />
-            </svg>
+            <!-- Asset attendu : logo-bibendum.png -->
+            <img src="/images/logo-bibendum.png" alt="Bibendum" v-if="assetsLoaded" />
+            <div v-else class="placeholder-box">Logo Bibendum</div>
           </div>
           <h1 class="splash-title">Bib Gourmand</h1>
         </div>
@@ -31,9 +21,9 @@
         
         <div class="auth-header">
           <h1 class="auth-title">S'inscrire ou se connecter</h1>
-          <svg class="squiggly-line" width="100%" height="12" viewBox="0 0 300 12" fill="none" preserveAspectRatio="none">
-            <path d="M5 6 Q 50 2 100 6 T 200 6 T 295 4" stroke="white" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
+          <!-- Asset attendu : squiggle-line.svg -->
+          <img src="/images/squiggle-line.svg" alt="" class="squiggly-line" v-if="assetsLoaded" />
+          <div v-else class="placeholder-line"></div>
         </div>
 
         <transition name="fade-slide" mode="out-in">
@@ -49,21 +39,27 @@
             <div class="buttons">
               <button class="auth-btn" @click="mode = 'register'">
                 <span class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <!-- Asset attendu : icon-email.svg -->
+                  <img src="/images/icon-email.svg" alt="Email" v-if="assetsLoaded" />
+                  <span v-else>✉️</span>
                 </span>
                 <span class="btn-text">Email</span>
               </button>
               
               <button class="auth-btn" @click="alertNotImplemented">
                 <span class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
+                  <!-- Asset attendu : icon-apple.svg -->
+                  <img src="/images/icon-apple.svg" alt="Apple" v-if="assetsLoaded" />
+                  <span v-else>🍎</span>
                 </span>
                 <span class="btn-text">Apple</span>
               </button>
               
               <button class="auth-btn" @click="alertNotImplemented">
                 <span class="icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  <!-- Asset attendu : icon-google.svg -->
+                  <img src="/images/icon-google.svg" alt="Google" v-if="assetsLoaded" />
+                  <span v-else>G</span>
                 </span>
                 <span class="btn-text">Google</span>
               </button>
@@ -78,7 +74,7 @@
 
           <!-- REGISTER MODE -->
           <div v-if="mode === 'register'" class="register-view" key="register">
-            <form @submit.prevent="handleSubmit" class="register-form">
+            <form @submit.prevent="handleRegister" class="register-form">
               <div class="input-group">
                 <label>Prénom</label>
                 <input type="text" placeholder="Prénom" v-model="form.firstname" required />
@@ -88,16 +84,47 @@
                 <label>Nom</label>
                 <input type="text" placeholder="Nom" v-model="form.lastname" required />
               </div>
+
+              <div class="input-group">
+                <label>Email</label>
+                <input type="email" placeholder="Email" v-model="form.email" required />
+              </div>
               
               <div class="input-group">
                 <label>Mot de Passe</label>
                 <input type="password" placeholder="Mot de Passe" v-model="form.password" required />
               </div>
 
-              <!-- Invisible or styled submit button, we keep it visible for actual usage -->
+              <div v-if="errorMessage" class="error-msg">{{ errorMessage }}</div>
+
               <button type="submit" class="submit-btn" :disabled="loading">
                 {{ loading ? 'Chargement...' : 'Continuer' }}
               </button>
+
+              <p class="toggle-mode" @click="switchMode('login')">Déjà inscrit ? Se connecter</p>
+            </form>
+          </div>
+
+          <!-- LOGIN MODE -->
+          <div v-if="mode === 'login'" class="register-view" key="login">
+            <form @submit.prevent="handleLogin" class="register-form">
+              <div class="input-group">
+                <label>Email</label>
+                <input type="email" placeholder="Email" v-model="form.email" required />
+              </div>
+              
+              <div class="input-group">
+                <label>Mot de Passe</label>
+                <input type="password" placeholder="Mot de Passe" v-model="form.password" required />
+              </div>
+
+              <div v-if="errorMessage" class="error-msg">{{ errorMessage }}</div>
+
+              <button type="submit" class="submit-btn" :disabled="loading">
+                {{ loading ? 'Connexion...' : 'Se connecter' }}
+              </button>
+
+              <p class="toggle-mode" @click="switchMode('register')">Pas de compte ? S'inscrire</p>
             </form>
           </div>
           
@@ -105,20 +132,9 @@
 
         <!-- Illustration (always at bottom) -->
         <div class="illustration-bottom">
-          <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <!-- Glass -->
-            <path d="M20 20 L80 20 L50 60 Z" />
-            <line x1="50" y1="60" x2="50" y2="90" />
-            <path d="M35 90 C 40 85, 60 85, 65 90 Z" />
-            <!-- Stick and Olive -->
-            <line x1="30" y1="10" x2="55" y2="40" />
-            <circle cx="45" cy="28" r="4" fill="none" />
-            <!-- Small bowl of olives -->
-            <path d="M60 90 C 60 100, 80 100, 80 90 Z" />
-            <circle cx="65" cy="88" r="3" fill="none" />
-            <circle cx="70" cy="86" r="3" fill="none" />
-            <circle cx="75" cy="88" r="3" fill="none" />
-          </svg>
+          <!-- Asset attendu : illustration-cocktail.png -->
+          <img src="/images/illustration-cocktail.png" alt="Cocktail" v-if="assetsLoaded" />
+          <div v-else class="placeholder-box cocktail-placeholder">Illustration Cocktail</div>
         </div>
 
       </div>
@@ -131,34 +147,56 @@ definePageMeta({
   layout: 'auth'
 })
 
-const mode = ref('splash') // 'splash', 'select', 'register'
+const mode = ref('splash') // 'splash', 'select', 'register', 'login'
 const loading = ref(false)
+const errorMessage = ref('')
 const router = useRouter()
+const assetsLoaded = ref(true) // Tous les assets sont maintenant fournis
 
 const form = ref({
   firstname: '',
   lastname: '',
-  email: 'test@example.com', // mock email since form doesn't show it but backend needs it
+  email: '',
   password: ''
 })
 
 onMounted(() => {
+  // Check auth
+  const token = localStorage.getItem('token')
+  if (token) {
+    router.push('/')
+    return
+  }
+
+  // Splash timeout
   setTimeout(() => {
     mode.value = 'select'
-  }, 2500)
+  }, 2000)
 })
+
+const switchMode = (newMode: string) => {
+  mode.value = newMode
+  errorMessage.value = ''
+  form.value.password = ''
+}
 
 const alertNotImplemented = () => {
   alert("Ce mode de connexion n'est pas disponible pour la démo. Veuillez utiliser l'Email.")
 }
 
-const handleSubmit = async () => {
+const handleRegister = async () => {
+  errorMessage.value = ''
+  if (!form.value.firstname || !form.value.lastname || !form.value.email || !form.value.password) {
+    errorMessage.value = 'Veuillez remplir tous les champs.'
+    return
+  }
+
   loading.value = true
   try {
-    const res = await $fetch('/api/auth/register', {
+    const res: any = await $fetch('/api/auth/register', {
       method: 'POST',
       body: {
-        email: form.value.firstname.toLowerCase() + '@example.com', // fallback for mockup that lacks email field
+        email: form.value.email,
         password: form.value.password,
         firstname: form.value.firstname,
         lastname: form.value.lastname
@@ -169,11 +207,46 @@ const handleSubmit = async () => {
       localStorage.setItem('token', res.token)
       router.push('/')
     }
-  } catch (error) {
-    console.error('Auth error', error)
-    // Even on error, we might want to bypass for the hackathon UI demo
-    localStorage.setItem('token', 'fake-jwt-token')
-    router.push('/')
+  } catch (error: any) {
+    console.error('Register error', error)
+    if (error.status === 409 || error.data?.message?.includes('already exists')) {
+      errorMessage.value = 'Cet email est déjà utilisé.'
+    } else {
+      errorMessage.value = error.data?.message || 'Erreur lors de la création du compte.'
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleLogin = async () => {
+  errorMessage.value = ''
+  if (!form.value.email || !form.value.password) {
+    errorMessage.value = 'Veuillez remplir tous les champs.'
+    return
+  }
+
+  loading.value = true
+  try {
+    const res: any = await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: {
+        email: form.value.email,
+        password: form.value.password
+      }
+    })
+
+    if (res.token) {
+      localStorage.setItem('token', res.token)
+      router.push('/')
+    }
+  } catch (error: any) {
+    console.error('Login error', error)
+    if (error.status === 401 || error.data?.message?.includes('Invalid credentials')) {
+      errorMessage.value = 'Email ou mot de passe incorrect.'
+    } else {
+      errorMessage.value = error.data?.message || 'Erreur lors de la connexion.'
+    }
   } finally {
     loading.value = false
   }
@@ -239,12 +312,12 @@ const handleSubmit = async () => {
 }
 
 .auth-header {
-  margin-top: 80px;
+  margin-top: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .auth-title {
@@ -258,6 +331,8 @@ const handleSubmit = async () => {
 
 .squiggly-line {
   opacity: 0.9;
+  width: 100%;
+  max-width: 300px;
 }
 
 /* SELECT VIEW */
@@ -289,7 +364,7 @@ const handleSubmit = async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .auth-btn {
@@ -316,6 +391,11 @@ const handleSubmit = async () => {
   align-items: center;
 }
 
+.auth-btn .icon img {
+  width: 20px;
+  height: 20px;
+}
+
 .auth-btn .btn-text {
   flex: 1;
   text-align: center;
@@ -331,7 +411,7 @@ const handleSubmit = async () => {
   font-weight: 300;
 }
 
-/* REGISTER VIEW */
+/* REGISTER / LOGIN VIEW */
 .register-view {
   width: 100%;
   max-width: 360px;
@@ -341,27 +421,27 @@ const handleSubmit = async () => {
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .input-group label {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 
 .input-group input {
-  height: 48px;
+  height: 44px;
   border: 1px solid white;
-  border-radius: 24px;
+  border-radius: 22px;
   background: transparent;
   color: white;
   padding: 0 24px;
@@ -376,6 +456,13 @@ const handleSubmit = async () => {
 .input-group input:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.05);
+}
+
+.error-msg {
+  color: #ffcccc;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: -4px;
 }
 
 .submit-btn {
@@ -393,15 +480,54 @@ const handleSubmit = async () => {
 .submit-btn:active {
   opacity: 0.8;
 }
+.submit-btn:disabled {
+  opacity: 0.5;
+}
+
+.toggle-mode {
+  text-align: center;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  opacity: 0.8;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+/* PLACEHOLDERS for missing assets */
+.placeholder-box {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.8rem;
+  border-radius: 50%;
+}
+.cocktail-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+}
+.placeholder-line {
+  width: 100%;
+  height: 2px;
+  background: rgba(255,255,255,0.5);
+  max-width: 200px;
+}
 
 /* ILLUSTRATION */
 .illustration-bottom {
   margin-top: auto;
   display: flex;
   justify-content: center;
-  padding-bottom: 30px;
-  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-top: 10px;
   opacity: 0.9;
+}
+.illustration-bottom img {
+  max-height: 120px;
 }
 
 /* ANIMATIONS */
