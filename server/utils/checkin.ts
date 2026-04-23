@@ -1,4 +1,5 @@
 import type { MichelinType } from '@prisma/client'
+import { prisma } from '~~/server/utils/db'
 
 const STAMPS_PER_PAGE = 4
 
@@ -53,5 +54,80 @@ export function computePasseportPlacement(existingTamponCount: number): {
     pageNumber,
     positionX: slot.x,
     positionY: slot.y,
+  }
+}
+
+export type UnlockedChapitreReward = {
+  id: number
+  chapitreId: number
+  chapitreTitre: string
+  titre: string
+  description: string
+  unlockedAt: Date
+  isUsed: boolean
+}
+
+export async function unlockChapitreRewardIfComplete(
+  userId: number,
+  chapitreId: number,
+  chapitreTitre: string
+): Promise<UnlockedChapitreReward | null> {
+  const totalHistoiresInChapter = await prisma.histoire.count({
+    where: { chapitreId },
+  })
+
+  if (totalHistoiresInChapter === 0) {
+    return null
+  }
+
+  const unlockedHistoiresInChapter = await prisma.userHistoire.count({
+    where: {
+      userId,
+      histoire: {
+        chapitreId,
+      },
+    },
+  })
+
+  if (unlockedHistoiresInChapter < totalHistoiresInChapter) {
+    return null
+  }
+
+  const chapitreRecompense = await prisma.recompense.findUnique({
+    where: { chapitreId },
+  })
+
+  if (!chapitreRecompense) {
+    return null
+  }
+
+  const existingUserReward = await prisma.userRecompense.findUnique({
+    where: {
+      userId_recompenseId: {
+        userId,
+        recompenseId: chapitreRecompense.id,
+      },
+    },
+  })
+
+  if (existingUserReward) {
+    return null
+  }
+
+  const userReward = await prisma.userRecompense.create({
+    data: {
+      userId,
+      recompenseId: chapitreRecompense.id,
+    },
+  })
+
+  return {
+    id: chapitreRecompense.id,
+    chapitreId: chapitreRecompense.chapitreId,
+    chapitreTitre,
+    titre: chapitreRecompense.titre,
+    description: chapitreRecompense.description,
+    unlockedAt: userReward.unlockedAt,
+    isUsed: userReward.isUsed,
   }
 }

@@ -316,108 +316,184 @@ async function main() {
   })
   console.log(`✅ ${tampons.count} tampons restaurants créés`)
 
-  const recompensesData = [
-    {
-      tamponRequired: 1,
-      titre: 'Histoire Michelin débloquée',
-      description: 'Débloque une histoire Michelin dès votre premier tampon.',
-    },
-    {
-      tamponRequired: 3,
-      titre: 'Verre offert',
-      description: 'Un verre offert pour célébrer vos 3 premiers tampons.',
-    },
-    {
-      tamponRequired: 5,
-      titre: 'Dessert offert',
-      description: 'Un dessert offert après 5 tampons collectés.',
-    },
-    {
-      tamponRequired: 10,
-      titre: 'Entrée offerte',
-      description: 'Une entrée offerte pour 10 tampons cumulés.',
-    },
-    {
-      tamponRequired: 15,
-      titre: 'Repas -20%',
-      description: 'Profitez de 20% de réduction après 15 tampons.',
-    },
-    {
-      tamponRequired: 20,
-      titre: 'Invitation cérémonie Michelin',
-      description: 'Invitation exclusive à la cérémonie Michelin.',
-    },
+  const chapitre1 = await prisma.chapitre.upsert({
+    where: { ordre: 1 },
+    update: { titre: 'Les Origines' },
+    create: { titre: 'Les Origines', ordre: 1 },
+  })
+
+  const chapitre2 = await prisma.chapitre.upsert({
+    where: { ordre: 2 },
+    update: { titre: 'Les Inspecteurs' },
+    create: { titre: 'Les Inspecteurs', ordre: 2 },
+  })
+
+  const chapitre3 = await prisma.chapitre.upsert({
+    where: { ordre: 3 },
+    update: { titre: 'Les Étoiles' },
+    create: { titre: 'Les Étoiles', ordre: 3 },
+  })
+
+  const orderedRestaurants = [...allRestaurants].sort((a, b) => a.id - b.id)
+  const restaurantByName = new Map(allRestaurants.map((restaurant) => [restaurant.name, restaurant]))
+
+  const chapitre1Restaurants = [
+    restaurantByName.get('Le Bistrot des Fables'),
+    restaurantByName.get('La Table de Mee'),
+    restaurantByName.get("La Cloche d'Or"),
   ]
 
-  const recompenses = await prisma.recompense.createMany({
-    data: recompensesData,
-    skipDuplicates: true,
-  })
-  console.log(`✅ ${recompenses.count} récompenses créées`)
+  const chapitre1RestaurantIds = new Set(
+    chapitre1Restaurants
+      .filter((restaurant): restaurant is NonNullable<typeof restaurant> => Boolean(restaurant))
+      .map((restaurant) => restaurant.id)
+  )
+
+  const remainingRestaurants = orderedRestaurants.filter(
+    (restaurant) => !chapitre1RestaurantIds.has(restaurant.id)
+  )
+
+  const chapitre2Restaurants = [remainingRestaurants[0], remainingRestaurants[1], remainingRestaurants[2]]
+  const chapitre3Restaurants = [remainingRestaurants[3], remainingRestaurants[4], remainingRestaurants[5]]
+
+  const allChapitresRestaurants = [
+    ...chapitre1Restaurants,
+    ...chapitre2Restaurants,
+    ...chapitre3Restaurants,
+  ]
+
+  if (allChapitresRestaurants.some((restaurant) => !restaurant)) {
+    throw new Error('Impossible de mapper les restaurants requis pour les 3 chapitres')
+  }
 
   const histoiresData = [
     {
-      titre: "La Naissance du Guide",
-      contenu:
-        "En 1900, André Michelin crée un petit guide rouge offert aux automobilistes. À l'époque, la France ne compte que 3 000 voitures. Le guide propose des conseils pratiques : comment changer un pneu, où trouver de l'essence, et bien sûr, où bien manger. Personne ne se doutait que ce modeste livret deviendrait la bible de la gastronomie mondiale.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1585540083814-ea6ee8af9e4f?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Curieux" }),
+      chapitreId: chapitre1.id,
+      restaurantId: chapitre1Restaurants[0]!.id,
+      titre: 'Le Carnet Rouge de 1900',
+      contenu: 'Le premier guide Michelin nait pour aider les automobilistes a voyager et bien manger. Il marque le debut de la legende gastronomique.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1585540083814-ea6ee8af9e4f?w=800',
+      ordre: 1,
     },
     {
-      titre: "La Première Étoile",
-      contenu:
-        "C'est en 1926 que le Guide Michelin commence à attribuer des étoiles aux restaurants. Une seule étoile d'abord, pour signaler les 'bonnes tables'. Le système à trois étoiles arrive en 1931, avec sa fameuse hiérarchie : une étoile pour une très bonne table, deux étoiles pour une cuisine excellente 'méritant un détour', et trois étoiles pour une cuisine exceptionnelle 'valant le voyage'.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Découvreur" }),
+      chapitreId: chapitre1.id,
+      restaurantId: chapitre1Restaurants[1]!.id,
+      titre: 'Les Premiers Itineraires Gourmands',
+      contenu: 'Les routes du guide relient les villes et les tables remarquables. Le voyage culinaire devient une aventure en soi.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800',
+      ordre: 2,
     },
     {
-      titre: "Le Secret des Inspecteurs",
-      contenu:
-        "Les inspecteurs Michelin sont les agents secrets de la gastronomie. Anonymes, ils visitent les restaurants en payant leur addition comme n'importe quel client. Leur identité est si bien gardée que même leurs familles ignorent parfois les détails de leur travail. Un inspecteur visite en moyenne 250 restaurants par an et prend ses repas seul pour rester concentré sur l'assiette.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Connaisseur" }),
+      chapitreId: chapitre1.id,
+      restaurantId: chapitre1Restaurants[2]!.id,
+      titre: 'L Heritage des Origines',
+      contenu: 'Des premiers garages aux grandes tables, Michelin construit une culture du gout qui inspire encore aujourd hui.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1495461199391-8c39ab674581?w=800',
+      ordre: 3,
     },
     {
-      titre: "Le Drame des Étoiles Perdues",
-      contenu:
-        "Perdre une étoile Michelin peut être dévastateur. En 2003, le chef Bernard Loiseau se donne la mort, hanté par la rumeur de la perte de sa troisième étoile. Ce drame a profondément marqué le monde de la gastronomie et a soulevé des questions sur la pression que le système d'étoiles exerce sur les chefs. Depuis, le Guide a évolué vers plus de transparence.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Inspecteur" }),
+      chapitreId: chapitre2.id,
+      restaurantId: chapitre2Restaurants[0]!.id,
+      titre: 'L Anonymat des Inspecteurs',
+      contenu: 'Les inspecteurs Michelin evaluent chaque adresse anonymement pour garantir une lecture juste et independante.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=800',
+      ordre: 1,
     },
     {
-      titre: "Le Bib Gourmand : L'Étoile du Peuple",
-      contenu:
-        "Créé en 1997, le Bib Gourmand (du surnom de Bibendum, la mascotte Michelin) récompense les restaurants offrant un excellent rapport qualité-prix. C'est la reconnaissance que la bonne cuisine n'est pas réservée aux grandes tables. Le Bib est devenu un symbole pour les gourmets malins qui veulent bien manger sans se ruiner.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
-      conditionUnlock: JSON.stringify({ type: "restaurant", value: 9 }),
+      chapitreId: chapitre2.id,
+      restaurantId: chapitre2Restaurants[1]!.id,
+      titre: 'La Rigueur des Visites',
+      contenu: 'Une meme table est visitee plusieurs fois afin de verifier constance, technique et personnalite culinaire.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
+      ordre: 2,
     },
     {
-      titre: "Bibendum : La Mascotte Immortelle",
-      contenu:
-        "Le Bonhomme Michelin, ou Bibendum, est né en 1898 quand Édouard Michelin voit une pile de pneus et dit 'Si elle avait des bras, elle aurait l'air d'un bonhomme'. Dessiné par Marius Rossillon, Bibendum est devenu l'une des plus anciennes et plus reconnues mascottes publicitaires au monde. En 2000, il a été élu 'meilleur logo du siècle'.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1495461199391-8c39ab674581?w=800",
-      conditionUnlock: JSON.stringify({ type: "checkin_count", value: 1 }),
+      chapitreId: chapitre2.id,
+      restaurantId: chapitre2Restaurants[2]!.id,
+      titre: 'Une Note Qui Compte',
+      contenu: 'Chaque detail de service et d assiette participe a la recommandation finale, devenue reference mondiale.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=800',
+      ordre: 3,
     },
     {
-      titre: "Le Guide Pendant la Guerre",
-      contenu:
-        "Pendant la Seconde Guerre mondiale, la publication du Guide est interrompue. Mais en 1944, les Alliés demandent à Michelin de réimprimer l'édition 1939 du guide de France — c'est la cartographie la plus précise disponible pour planifier le Débarquement en Normandie. Le Guide Michelin a littéralement aidé à libérer la France.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Grand Gastronome" }),
+      chapitreId: chapitre3.id,
+      restaurantId: chapitre3Restaurants[0]!.id,
+      titre: 'La Premiere Etoile',
+      contenu: 'Une etoile signale une tres bonne table. C est le debut d une reconnaissance exigeante et recherchee.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800',
+      ordre: 1,
     },
     {
-      titre: "La Conquête du Monde",
-      contenu:
-        "Longtemps cantonné à l'Europe, le Guide Michelin s'est internationalisé à partir de 2005 avec New York, puis Tokyo en 2007. Tokyo est rapidement devenue la ville la plus étoilée du monde, dépassant Paris. Aujourd'hui, le Guide couvre plus de 40 pays sur tous les continents, de São Paulo à Bangkok, de Séoul à Dubaï.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800",
-      conditionUnlock: JSON.stringify({ type: "checkin_count", value: 15 }),
+      chapitreId: chapitre3.id,
+      restaurantId: chapitre3Restaurants[1]!.id,
+      titre: 'Deux Etoiles et le Detour',
+      contenu: 'Deux etoiles racontent une cuisine d exception qui merite de changer de route pour la decouvrir.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
+      ordre: 2,
+    },
+    {
+      chapitreId: chapitre3.id,
+      restaurantId: chapitre3Restaurants[2]!.id,
+      titre: 'Trois Etoiles, le Voyage',
+      contenu: 'Trois etoiles consacrent une destination culinaire en soi, une table qui justifie a elle seule le voyage.',
+      imageCarteUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800',
+      ordre: 3,
     },
   ]
 
   for (const histoire of histoiresData) {
-    await prisma.histoire.create({ data: histoire })
+    await prisma.histoire.upsert({
+      where: { restaurantId: histoire.restaurantId },
+      update: histoire,
+      create: histoire,
+    })
   }
   console.log(`✅ ${histoiresData.length} histoires créées`)
+
+  const recompense1 = await prisma.recompense.upsert({
+    where: { chapitreId: chapitre1.id },
+    update: {
+      titre: 'Verre offert',
+      description: 'Chapitre Les Origines completé : un verre offert.',
+    },
+    create: {
+      chapitreId: chapitre1.id,
+      titre: 'Verre offert',
+      description: 'Chapitre Les Origines completé : un verre offert.',
+    },
+  })
+
+  const recompense2 = await prisma.recompense.upsert({
+    where: { chapitreId: chapitre2.id },
+    update: {
+      titre: 'Dessert offert',
+      description: 'Chapitre Les Inspecteurs completé : un dessert offert.',
+    },
+    create: {
+      chapitreId: chapitre2.id,
+      titre: 'Dessert offert',
+      description: 'Chapitre Les Inspecteurs completé : un dessert offert.',
+    },
+  })
+
+  const recompense3 = await prisma.recompense.upsert({
+    where: { chapitreId: chapitre3.id },
+    update: {
+      titre: 'Entrée offerte',
+      description: 'Chapitre Les Étoiles completé : une entrée offerte.',
+    },
+    create: {
+      chapitreId: chapitre3.id,
+      titre: 'Entrée offerte',
+      description: 'Chapitre Les Étoiles completé : une entrée offerte.',
+    },
+  })
+
+  await prisma.chapitre.update({ where: { id: chapitre1.id }, data: { recompenseId: recompense1.id } })
+  await prisma.chapitre.update({ where: { id: chapitre2.id }, data: { recompenseId: recompense2.id } })
+  await prisma.chapitre.update({ where: { id: chapitre3.id }, data: { recompenseId: recompense3.id } })
+
+  console.log('✅ 3 récompenses de chapitres créées')
 
   console.log('🎉 Seed terminé avec succès !')
 }

@@ -60,10 +60,9 @@ const loadStories = async () => {
     loading.value = true
     error.value = ''
 
-    // Load all stories
-    allStories.value = await $fetch('/api/histoires')
+    const allStoriesResponse = await $fetch('/api/histoires')
+    allStories.value = allStoriesResponse
 
-    // Load unlocked stories if logged in
     const token = localStorage.getItem('token')
     if (token) {
       try {
@@ -72,8 +71,17 @@ const loadStories = async () => {
             Authorization: `Bearer ${token}`,
           },
         })
+
+        const unlockedById = new Map(
+          unlockedStories.value.map((story: any) => [story.id, story])
+        )
+
+        allStories.value = allStoriesResponse.map((story: any) => ({
+          ...story,
+          unlockedAt: unlockedById.get(story.id)?.unlockedAt ?? null,
+          unlocked: unlockedById.has(story.id),
+        }))
       } catch (err) {
-        // User not authenticated, that's ok
         unlockedStories.value = []
       }
     }

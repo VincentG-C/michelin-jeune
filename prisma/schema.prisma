@@ -54,6 +54,7 @@ model Restaurant {
 
   checkins Checkin[]
   tampon   Tampon?
+  histoires Histoire[]
 
   @@map("restaurants")
 }
@@ -98,11 +99,25 @@ model UserTampon {
   @@map("user_tampons")
 }
 
+model Chapitre {
+  id          Int    @id @default(autoincrement())
+  titre       String
+  ordre       Int    @unique
+  recompenseId Int?  @unique @map("recompense_id")
+
+  histoires   Histoire[]
+  recompense  Recompense?
+
+  @@map("chapitres")
+}
+
 model Recompense {
-  id             Int      @id @default(autoincrement())
-  tamponRequired Int      @unique @map("tampon_required")
-  titre          String
-  description    String
+  id          Int      @id @default(autoincrement())
+  chapitreId  Int      @unique @map("chapitre_id")
+  titre       String
+  description String
+
+  chapitre        Chapitre       @relation(fields: [chapitreId], references: [id], onDelete: Cascade)
 
   userRecompenses UserRecompense[]
 
@@ -124,13 +139,19 @@ model UserRecompense {
 }
 
 model Histoire {
-  id              Int    @id @default(autoincrement())
-  titre           String
-  contenu         String
-  imageCarteUrl   String? @map("image_carte_url")
-  conditionUnlock String  @map("condition_unlock")
+  id            Int     @id @default(autoincrement())
+  chapitreId    Int     @map("chapitre_id")
+  restaurantId  Int     @unique @map("restaurant_id")
+  titre         String
+  contenu       String
+  imageCarteUrl String? @map("image_carte_url")
+  ordre         Int
 
+  chapitre      Chapitre     @relation(fields: [chapitreId], references: [id], onDelete: Cascade)
+  restaurant    Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   userHistoires UserHistoire[]
+
+  @@unique([chapitreId, ordre])
 
   @@map("histoires")
 }

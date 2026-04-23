@@ -4,12 +4,9 @@ import { getUserIdFromEvent } from '~~/server/utils/auth'
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
 
-  const totalTampons = await prisma.userTampon.count({
-    where: { userId },
-  })
-
   const allRecompenses = await prisma.recompense.findMany({
-    orderBy: { tamponRequired: 'asc' },
+    include: { chapitre: true },
+    orderBy: { chapitre: { ordre: 'asc' } },
   })
 
   const unlockedRecompenses = await prisma.userRecompense.findMany({
@@ -21,13 +18,14 @@ export default defineEventHandler(async (event) => {
   )
 
   return {
-    totalTampons,
     recompenses: allRecompenses.map((recompense) => {
       const unlocked = unlockedMap.get(recompense.id)
 
       return {
         id: recompense.id,
-        tamponRequired: recompense.tamponRequired,
+        chapitreId: recompense.chapitreId,
+        chapitreTitre: recompense.chapitre.titre,
+        chapitreOrdre: recompense.chapitre.ordre,
         titre: recompense.titre,
         description: recompense.description,
         unlocked: Boolean(unlocked),

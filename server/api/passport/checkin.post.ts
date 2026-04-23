@@ -4,9 +4,21 @@ import {
   computePasseportPlacement,
   getDistanceInMeters,
   getTamponColor,
+  unlockChapitreRewardIfComplete,
 } from '~~/server/utils/checkin'
 
 const CHECKIN_RADIUS_METERS = 200
+
+type LinkedHistoire = {
+  id: number
+  chapitreId: number
+  chapitreTitre: string
+  restaurantId: number
+  ordre: number
+  titre: string
+  contenu: string
+  imageCarteUrl: string | null
+}
 
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
@@ -103,37 +115,87 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  const totalTampons = existingTamponCount + 1
-  const eligibleRecompenses = await prisma.recompense.findMany({
-    where: { tamponRequired: { lte: totalTampons } },
-    orderBy: { tamponRequired: 'asc' },
-  })
+  const histoires = await prisma.$queryRaw<LinkedHistoire[]>`
+    SELECT
+      h.id,
+      h.chapitre_id AS "chapitreId",
+      c.titre AS "chapitreTitre",
+      h.restaurant_id AS "restaurantId",
+      h.ordre,
+      h.titre,
+      h.contenu,
+      h.image_carte_url AS "imageCarteUrl"
+    FROM histoires h
+    JOIN chapitres c ON c.id = h.chapitre_id
+    WHERE h.restaurant_id = ${restaurantId}
+    LIMIT 1
+  `
 
-  const alreadyUnlocked = await prisma.userRecompense.findMany({
-    where: {
-      userId,
-      recompenseId: { in: eligibleRecompenses.map((reward) => reward.id) },
-    },
-    select: { recompenseId: true },
-  })
+  const histoire = histoires[0] ?? null
 
-  const unlockedRewardIds = new Set(alreadyUnlocked.map((reward) => reward.recompenseId))
-  const rewardsToUnlock = eligibleRecompenses.filter((reward) => !unlockedRewardIds.has(reward.id))
-  const newRecompenses = []
+  let histoireDebloquee: {
+    id: number
+    chapitreId: number
+    chapitreTitre: string
+    ordre: number
+    restaurantId: number
+    titre: string
+    contenu: string
+    imageCarteUrl: string | null
+    unlockedAt: Date
+  } | null = null
 
-  for (const reward of rewardsToUnlock) {
-    const unlocked = await prisma.userRecompense.create({
-      data: {
-        userId,
-        recompenseId: reward.id,
+  let recompenseDebloquee: {
+    id: number
+    chapitreId: number
+    chapitreTitre: string
+    titre: string
+    description: string
+    unlockedAt: Date
+    isUsed: boolean
+  } | null = null
+
+  if (histoire) {
+    const alreadyUnlockedHistoire = await prisma.userHistoire.findUnique({
+      where: {
+        userId_histoireId: {
+          userId,
+          histoireId: histoire.id,
+        },
       },
-      include: { recompense: true },
     })
 
-    newRecompenses.push(unlocked)
-  }
+    let unlockedHistoire: { unlockedAt: Date } | null = null
 
-  const latestRecompense = newRecompenses[newRecompenses.length - 1] ?? null
+    if (!alreadyUnlockedHistoire) {
+      unlockedHistoire = await prisma.userHistoire.create({
+        data: {
+          userId,
+          histoireId: histoire.id,
+        },
+      })
+    }
+
+    if (unlockedHistoire) {
+      histoireDebloquee = {
+        id: histoire.id,
+        chapitreId: histoire.chapitreId,
+        chapitreTitre: histoire.chapitreTitre,
+        ordre: histoire.ordre,
+        restaurantId: histoire.restaurantId,
+        titre: histoire.titre,
+        contenu: histoire.contenu,
+        imageCarteUrl: histoire.imageCarteUrl,
+        unlockedAt: unlockedHistoire.unlockedAt,
+      }
+    }
+
+    recompenseDebloquee = await unlockChapitreRewardIfComplete(
+      userId,
+      histoire.chapitreId,
+      histoire.chapitreTitre
+    )
+  }
 
   return {
     checkin,
@@ -150,15 +212,7 @@ export default defineEventHandler(async (event) => {
       positionY: collectedTampon.positionY,
       collectedAt: collectedTampon.collectedAt,
     },
-    recompense: latestRecompense
-      ? {
-          id: latestRecompense.recompense.id,
-          tamponRequired: latestRecompense.recompense.tamponRequired,
-          titre: latestRecompense.recompense.titre,
-          description: latestRecompense.recompense.description,
-          unlockedAt: latestRecompense.unlockedAt,
-          isUsed: latestRecompense.isUsed,
-        }
-      : null,
+    histoireDebloquee,
+    recompenseDebloquee,
   }
 })

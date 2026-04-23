@@ -24,7 +24,13 @@ export default defineEventHandler(async (event) => {
 
   const recompenses = await prisma.userRecompense.findMany({
     where: { userId },
-    include: { recompense: true },
+    include: {
+      recompense: {
+        include: {
+          chapitre: true,
+        },
+      },
+    },
     orderBy: { unlockedAt: 'desc' },
   })
 
@@ -60,7 +66,9 @@ export default defineEventHandler(async (event) => {
     })),
     recompenses: recompenses.map((ur) => ({
       id: ur.recompense.id,
-      tamponRequired: ur.recompense.tamponRequired,
+      chapitreId: ur.recompense.chapitreId,
+      chapitreTitre: ur.recompense.chapitre.titre,
+      chapitreOrdre: ur.recompense.chapitre.ordre,
       titre: ur.recompense.titre,
       description: ur.recompense.description,
       unlockedAt: ur.unlockedAt,

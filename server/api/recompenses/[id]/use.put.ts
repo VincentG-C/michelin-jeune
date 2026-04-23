@@ -20,7 +20,11 @@ export default defineEventHandler(async (event) => {
       },
     },
     include: {
-      recompense: true,
+      recompense: {
+        include: {
+          chapitre: true,
+        },
+      },
     },
   })
 
@@ -41,12 +45,20 @@ export default defineEventHandler(async (event) => {
   const usedRecompense = await prisma.userRecompense.update({
     where: { id: unlockedRecompense.id },
     data: { isUsed: true },
-    include: { recompense: true },
+    include: {
+      recompense: {
+        include: {
+          chapitre: true,
+        },
+      },
+    },
   })
 
   return {
     id: usedRecompense.recompense.id,
-    tamponRequired: usedRecompense.recompense.tamponRequired,
+    chapitreId: usedRecompense.recompense.chapitreId,
+    chapitreTitre: usedRecompense.recompense.chapitre.titre,
+    chapitreOrdre: usedRecompense.recompense.chapitre.ordre,
     titre: usedRecompense.recompense.titre,
     description: usedRecompense.recompense.description,
     unlockedAt: usedRecompense.unlockedAt,
