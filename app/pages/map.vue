@@ -13,28 +13,13 @@
     </div>
 
     <!-- Map View -->
-    <div v-show="!showList" class="map-container">
-      <div class="map-placeholder" style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')">
-        <div class="map-overlay"></div>
-        
-        <!-- Pins -->
-        <div class="pin pin-red" style="top: 30%; left: 40%;" @click="selectRestaurant(restaurants[0])">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="white" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>
-        </div>
-        <div class="pin pin-purple" style="top: 50%; left: 60%;" @click="selectRestaurant(restaurants[1])">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="white" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>
-        </div>
-        <div class="pin pin-blue" style="top: 70%; left: 30%;" @click="selectRestaurant(restaurants[2])">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="white" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg>
-        </div>
-      </div>
-    </div>
+    <div v-show="!showList" class="map-container" ref="mapContainer"></div>
 
     <!-- List View -->
     <div v-show="showList" class="list-container">
       <div class="list-header">
         <h2>Restaurants à proximité</h2>
-        <p>16 résultats trouvés</p>
+        <p>{{ restaurants?.length || 0 }} résultats trouvés</p>
       </div>
       <div class="restaurant-list">
         <div class="restaurant-card" v-for="r in restaurants" :key="r.id" @click="selectRestaurant(r)">
@@ -42,11 +27,13 @@
             <h3 class="serif-italic">{{ r.name }}</h3>
             <p class="address">{{ r.city }} • {{ r.cuisine }}</p>
             <div class="tags">
-              <span class="tag" v-for="tag in r.tags" :key="tag">{{ tag }}</span>
+              <span class="tag" v-if="r.isEco">Éco-responsable</span>
+              <span class="tag" v-if="r.isHiddenGem">Pépite cachée</span>
+              <span class="tag" v-if="r.isVisual">Très visuel</span>
             </div>
           </div>
           <div class="card-image">
-            <img :src="r.image" :alt="r.name" />
+            <img :src="r.image || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&q=80'" :alt="r.name" />
           </div>
         </div>
       </div>
@@ -61,12 +48,14 @@
             <h3 class="serif-italic">{{ selectedRestaurant.name }}</h3>
             <p class="address">{{ selectedRestaurant.address }} • {{ selectedRestaurant.cuisine }}</p>
             <div class="tags">
-              <span class="tag" v-for="tag in selectedRestaurant.tags" :key="tag">{{ tag }}</span>
+              <span class="tag" v-if="selectedRestaurant.isEco">Éco-responsable</span>
+              <span class="tag" v-if="selectedRestaurant.isHiddenGem">Pépite cachée</span>
+              <span class="tag" v-if="selectedRestaurant.isVisual">Très visuel</span>
             </div>
             <button class="btn-primary" @click="checkIn">Je suis ici (Check-in)</button>
           </div>
           <div class="sheet-image">
-            <img :src="selectedRestaurant.image" :alt="selectedRestaurant.name" />
+            <img :src="selectedRestaurant.image || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&q=80'" :alt="selectedRestaurant.name" />
           </div>
         </div>
         <button class="close-sheet" @click="selectedRestaurant = null">
@@ -78,46 +67,78 @@
 </template>
 
 <script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
+
 const showList = ref(false)
 const selectedRestaurant = ref(null)
 const router = useRouter()
+const mapContainer = ref(null)
+let map = null
 
-const restaurants = ref([
-  {
-    id: 1,
-    name: 'Bistrot des Fables',
-    address: '139 Rue Saint-Dominique, Paris',
-    city: 'Paris 7e',
-    cuisine: 'Cuisine traditionnelle',
-    tags: ['Pépite caché', 'Bib Gourmand'],
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&q=80'
-  },
-  {
-    id: 2,
-    name: 'Table de Mee',
-    address: '5 Rue d\'Argenteuil, Paris',
-    city: 'Paris 1er',
-    cuisine: 'Cuisine coréenne',
-    tags: ['Épicé', 'Étoilé'],
-    image: 'https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=400&q=80'
-  },
-  {
-    id: 3,
-    name: 'La Cloche d\'Or',
-    address: '3 Rue Mansart, Paris',
-    city: 'Paris 9e',
-    cuisine: 'Brasserie',
-    tags: ['Ouvert tard', 'Historique'],
-    image: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=400&q=80'
-  }
-])
+const config = useRuntimeConfig()
+mapboxgl.accessToken = config.public.mapboxToken
+
+const { data: restaurants } = await useFetch('/api/restaurants')
+
+onMounted(() => {
+  if (!mapContainer.value) return
+
+  // Initialize Mapbox centered on Paris
+  map = new mapboxgl.Map({
+    container: mapContainer.value,
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [2.3522, 48.8566],
+    zoom: 12
+  })
+
+  map.on('load', () => {
+    // Add markers for each restaurant
+    if (restaurants.value && restaurants.value.length > 0) {
+      restaurants.value.forEach(r => {
+        // Create a custom marker element
+        const el = document.createElement('div')
+        el.className = 'custom-marker'
+        el.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#C8102E" stroke="white" stroke-width="1.5">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3" fill="white"/>
+          </svg>
+        `
+
+        // Add click event
+        el.addEventListener('click', (e) => {
+          e.stopPropagation() // Prevent map click
+          selectRestaurant(r)
+        })
+
+        new mapboxgl.Marker(el)
+          .setLngLat([r.lng, r.lat])
+          .addTo(map)
+      })
+    }
+  })
+
+  // Close sheet when clicking on the map
+  map.on('click', () => {
+    selectedRestaurant.value = null
+  })
+})
 
 const selectRestaurant = (r) => {
   selectedRestaurant.value = r
+  if (map) {
+    map.flyTo({
+      center: [r.lng, r.lat],
+      zoom: 15,
+      essential: true
+    })
+  }
 }
 
 const checkIn = async () => {
-  // Simulate check-in
   alert(`Check-in réussi chez ${selectedRestaurant.value.name}!`)
   router.push('/profil')
 }
@@ -182,38 +203,20 @@ const checkIn = async () => {
   left: 0;
 }
 
-.map-placeholder {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  position: relative;
+.map-container :deep(.mapboxgl-canvas) {
+  outline: none;
 }
 
-.map-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.2);
-}
-
-.pin {
-  position: absolute;
-  transform: translate(-50%, -100%);
+.map-container :deep(.custom-marker) {
   cursor: pointer;
-  transition: transform 0.2s;
+  transform: translate(-50%, -100%);
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+  transition: transform 0.2s;
 }
 
-.pin:hover {
+.map-container :deep(.custom-marker:hover) {
   transform: translate(-50%, -110%) scale(1.1);
 }
-
-.pin-red { color: var(--color-michelin-red); }
-.pin-purple { color: #8A2BE2; }
-.pin-blue { color: var(--color-navy); }
 
 /* List View */
 .list-container {
