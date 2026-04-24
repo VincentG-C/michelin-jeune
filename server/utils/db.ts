@@ -1,11 +1,13 @@
-import { PrismaClient } from '@prisma/client'
+import pkg from '@prisma/client'
+const { PrismaClient } = pkg
+import type { PrismaClient as PrismaClientType } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://admin:michelin2026@localhost:5432/michelin_pulse'
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
+  prisma: PrismaClientType | undefined
 }
 
 function createPrismaClient() {

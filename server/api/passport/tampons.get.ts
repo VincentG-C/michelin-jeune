@@ -5,24 +5,39 @@ export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
 
   const allTampons = await prisma.tampon.findMany({
+    include: {
+      restaurant: true,
+    },
     orderBy: { id: 'asc' },
   })
 
-  const unlockedTampons = await prisma.userTampon.findMany({
+  const collectedTampons = await prisma.userTampon.findMany({
     where: { userId },
-    select: { tamponId: true, unlockedAt: true },
+    select: { tamponId: true, collectedAt: true },
   })
 
-  const unlockedMap = new Map(
-    unlockedTampons.map((ut) => [ut.tamponId, ut.unlockedAt])
-  )
+  const collectedStats = new Map<number, { count: number, lastCollectedAt: Date | null }>()
+
+  for (const collected of collectedTampons) {
+    const current = collectedStats.get(collected.tamponId) || { count: 0, lastCollectedAt: null }
+
+    current.count += 1
+
+    if (!current.lastCollectedAt || collected.collectedAt > current.lastCollectedAt) {
+      current.lastCollectedAt = collected.collectedAt
+    }
+
+    collectedStats.set(collected.tamponId, current)
+  }
 
   return allTampons.map((tampon) => ({
     id: tampon.id,
-    name: tampon.name,
-    description: tampon.description,
-    icon: tampon.icon,
-    unlocked: unlockedMap.has(tampon.id),
-    unlockedAt: unlockedMap.get(tampon.id) || null,
+    restaurantId: tampon.restaurantId,
+    restaurantName: tampon.restaurant.name,
+    imageUrl: tampon.imageUrl,
+    color: tampon.color,
+    unlocked: collectedStats.has(tampon.id),
+    collectCount: collectedStats.get(tampon.id)?.count || 0,
+    lastCollectedAt: collectedStats.get(tampon.id)?.lastCollectedAt || null,
   }))
 })

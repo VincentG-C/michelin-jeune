@@ -12,7 +12,25 @@ export default defineEventHandler(async (event) => {
 
   const tampons = await prisma.userTampon.findMany({
     where: { userId },
-    include: { tampon: true },
+    include: {
+      tampon: {
+        include: {
+          restaurant: true,
+        },
+      },
+    },
+    orderBy: { collectedAt: 'desc' },
+  })
+
+  const recompenses = await prisma.userRecompense.findMany({
+    where: { userId },
+    include: {
+      recompense: {
+        include: {
+          chapitre: true,
+        },
+      },
+    },
     orderBy: { unlockedAt: 'desc' },
   })
 
@@ -35,11 +53,26 @@ export default defineEventHandler(async (event) => {
       checkedAt: c.checkedAt,
     })),
     tampons: tampons.map((ut) => ({
-      id: ut.tampon.id,
-      name: ut.tampon.name,
-      description: ut.tampon.description,
-      icon: ut.tampon.icon,
-      unlockedAt: ut.unlockedAt,
+      id: ut.id,
+      tamponId: ut.tampon.id,
+      restaurantId: ut.tampon.restaurantId,
+      restaurantName: ut.tampon.restaurant.name,
+      imageUrl: ut.tampon.imageUrl,
+      color: ut.tampon.color,
+      pageNumber: ut.pageNumber,
+      positionX: ut.positionX,
+      positionY: ut.positionY,
+      collectedAt: ut.collectedAt,
+    })),
+    recompenses: recompenses.map((ur) => ({
+      id: ur.recompense.id,
+      chapitreId: ur.recompense.chapitreId,
+      chapitreTitre: ur.recompense.chapitre.titre,
+      chapitreOrdre: ur.recompense.chapitre.ordre,
+      titre: ur.recompense.titre,
+      description: ur.recompense.description,
+      unlockedAt: ur.unlockedAt,
+      isUsed: ur.isUsed,
     })),
   }
 })

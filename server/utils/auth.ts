@@ -14,7 +14,11 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function generateToken(userId: number): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  return jwt.sign(
+    { userId },
+    JWT_SECRET as jwt.Secret,
+    { expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'] }
+  )
 }
 
 export function verifyToken(token: string): { userId: number } {
@@ -33,6 +37,13 @@ export function getUserIdFromEvent(event: H3Event): number {
 
   const token = authHeader.split(' ')[1]
 
+  if (!token) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Token manquant ou invalide',
+    })
+  }
+
   try {
     const decoded = verifyToken(token)
     return decoded.userId
@@ -45,7 +56,7 @@ export function getUserIdFromEvent(event: H3Event): number {
 }
 
 export function getUserLevel(checkinCount: number): string {
-  if (checkinCount > 50) return 'Grand Gastronome'
+  if (checkinCount >= 50) return 'Grand Gastronome'
   if (checkinCount >= 26) return 'Inspecteur'
   if (checkinCount >= 11) return 'Connaisseur'
   if (checkinCount >= 4) return 'Découvreur'

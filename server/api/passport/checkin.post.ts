@@ -1,8 +1,14 @@
 import { prisma } from '~~/server/utils/db'
 import { getUserIdFromEvent } from '~~/server/utils/auth'
-import { getDistanceInMeters, checkAndUnlockTampons, checkAndUnlockHistoires } from '~~/server/utils/checkin'
+import {
+  computePasseportPlacement,
+  getDistanceInMeters,
+  getTamponColor,
+  unlockNextHistoireForCheckin,
+  unlockChapitreRewardIfComplete,
+} from '~~/server/utils/checkin'
 
-const CHECKIN_RADIUS_METERS = 200
+const CHECKIN_RADIUS_METERS = 6000
 
 export default defineEventHandler(async (event) => {
   const userId = getUserIdFromEvent(event)
@@ -61,19 +67,86 @@ export default defineEventHandler(async (event) => {
   }
 
   const checkin = await prisma.checkin.create({
-    data: { userId, restaurantId },
+    data: {
+      userId,
+      restaurantId,
+      checkedAt: body.visited_at ? new Date(body.visited_at) : new Date(),
+    },
     include: { restaurant: true },
   })
 
-  const newTampons = await checkAndUnlockTampons(userId)
-  const newHistoires = await checkAndUnlockHistoires(userId)
+  const tampon = await prisma.tampon.upsert({
+    where: { restaurantId },
+    update: {},
+    create: {
+      restaurantId,
+      imageUrl: null,
+      color: getTamponColor(restaurant.michelinType, restaurant.isEco),
+    },
+    include: {
+      restaurant: true,
+    },
+  })
+
+  const existingTamponCount = await prisma.userTampon.count({ where: { userId } })
+  const placement = computePasseportPlacement(existingTamponCount)
+
+  const collectedTampon = await prisma.userTampon.create({
+    data: {
+      userId,
+      tamponId: tampon.id,
+      pageNumber: placement.pageNumber,
+      positionX: placement.positionX,
+      positionY: placement.positionY,
+      collectedAt: checkin.checkedAt,
+    },
+    include: {
+      tampon: {
+        include: {
+          restaurant: true,
+        },
+      },
+    },
+  })
+
+  const histoireDebloquee = await unlockNextHistoireForCheckin(userId)
+
+  let recompenseDebloquee: {
+    id: number
+    chapitreId: number
+    chapitreOrdre: number
+    chapitreTitre: string
+    titre: string
+    description: string
+    unlockedAt: Date
+    isUsed: boolean
+  } | null = null
+
+  if (histoireDebloquee) {
+    recompenseDebloquee = await unlockChapitreRewardIfComplete(userId, histoireDebloquee.chapitreId)
+  }
+
+  const nouveauTampon = {
+    id: collectedTampon.id,
+    tamponId: collectedTampon.tamponId,
+    restaurantId: collectedTampon.tampon.restaurantId,
+    restaurantName: collectedTampon.tampon.restaurant.name,
+    imageUrl: collectedTampon.tampon.imageUrl,
+    color: collectedTampon.tampon.color,
+    pageNumber: collectedTampon.pageNumber,
+    positionX: collectedTampon.positionX,
+    positionY: collectedTampon.positionY,
+    collectedAt: collectedTampon.collectedAt,
+  }
 
   return {
     checkin,
     distance: Math.round(distance),
-    unlocks: {
-      tampons: newTampons,
-      histoires: newHistoires,
-    },
+    nouveauTampon,
+    newTampons: [nouveauTampon],
+    histoireDebloquee,
+    unlockedHistoires: histoireDebloquee ? [histoireDebloquee] : [],
+    recompenseDebloquee,
+    unlockedRewards: recompenseDebloquee ? [recompenseDebloquee] : [],
   }
 })

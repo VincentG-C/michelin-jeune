@@ -20,10 +20,12 @@
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@prisma/config": "^7.7.0",
+    "@types/mapbox-gl": "^3.4.1",
     "@vite-pwa/nuxt": "^1.1.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
+    "mapbox-gl": "^3.22.0",
     "nuxt": "^4.4.2",
     "pg": "^8.20.0",
     "prisma": "^7.7.0",
@@ -31,6 +33,7 @@
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "tsx": "^4.21.0"
   }
 }

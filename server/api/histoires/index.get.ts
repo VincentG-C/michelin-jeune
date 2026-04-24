@@ -2,17 +2,26 @@ import { prisma } from '~~/server/utils/db'
 
 export default defineEventHandler(async () => {
   const histoires = await prisma.histoire.findMany({
-    select: {
-      id: true,
-      titre: true,
-      imageCarteUrl: true,
-      conditionUnlock: true,
+    include: {
+      chapitre: true,
+      restaurant: true,
     },
-    orderBy: { id: 'asc' },
+    orderBy: [{ chapitre: { ordre: 'asc' } }, { ordre: 'asc' }],
   })
 
-  return histoires.map((h) => ({
-    ...h,
-    conditionUnlock: JSON.parse(h.conditionUnlock),
+  return histoires.map((histoire) => ({
+    id: histoire.id,
+    chapitre: {
+      id: histoire.chapitre.id,
+      titre: histoire.chapitre.titre,
+      ordre: histoire.chapitre.ordre,
+    },
+    restaurant: {
+      id: histoire.restaurant.id,
+      name: histoire.restaurant.name,
+    },
+    ordre: histoire.ordre,
+    titre: histoire.titre,
+    imageCarteUrl: histoire.imageCarteUrl,
   }))
 })

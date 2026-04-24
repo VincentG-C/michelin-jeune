@@ -1,5 +1,14 @@
-import { prisma } from './db'
-import { getUserLevel } from './auth'
+import type { MichelinType } from '@prisma/client'
+import { prisma } from '~~/server/utils/db'
+
+const STAMPS_PER_PAGE = 4
+
+const STAMP_POSITIONS = [
+  { x: 25, y: 25 },
+  { x: 75, y: 25 },
+  { x: 25, y: 75 },
+  { x: 75, y: 75 },
+]
 
 export function getDistanceInMeters(
   lat1: number, lng1: number,
@@ -20,126 +29,194 @@ function toRad(deg: number): number {
   return deg * (Math.PI / 180)
 }
 
-export async function checkAndUnlockTampons(userId: number): Promise<any[]> {
-  const newUnlocks: any[] = []
-
-  const checkins = await prisma.checkin.findMany({
-    where: { userId },
-    include: { restaurant: true },
-  })
-
-  const checkinCount = checkins.length
-
-  const unlockedTamponIds = (
-    await prisma.userTampon.findMany({
-      where: { userId },
-      select: { tamponId: true },
-    })
-  ).map((ut) => ut.tamponId)
-
-  const lockedTampons = await prisma.tampon.findMany({
-    where: { id: { notIn: unlockedTamponIds.length > 0 ? unlockedTamponIds : [0] } },
-  })
-
-  for (const tampon of lockedTampons) {
-    const condition = JSON.parse(tampon.condition)
-    let shouldUnlock = false
-
-    switch (condition.type) {
-      case 'checkin_count':
-        shouldUnlock = checkinCount >= condition.value
-        break
-
-      case 'michelin_type':
-        shouldUnlock = checkins.some(
-          (c) => c.restaurant.michelinType === condition.value
-        )
-        break
-
-      case 'hidden_gem':
-        shouldUnlock = checkins.some((c) => c.restaurant.isHiddenGem)
-        break
-
-      case 'eco':
-        shouldUnlock = checkins.some((c) => c.restaurant.isEco)
-        break
-
-      case 'bib_count': {
-        const bibCount = checkins.filter(
-          (c) => c.restaurant.michelinType === 'bib'
-        ).length
-        shouldUnlock = bibCount >= condition.value
-        break
-      }
-    }
-
-    if (shouldUnlock) {
-      const userTampon = await prisma.userTampon.create({
-        data: { userId, tamponId: tampon.id },
-        include: { tampon: true },
-      })
-      newUnlocks.push(userTampon)
-    }
+export function getTamponColor(michelinType: MichelinType, isEco: boolean): string {
+  if (michelinType === 'etoile_1' || michelinType === 'etoile_2' || michelinType === 'etoile_3') {
+    return 'bordeaux'
   }
 
-  return newUnlocks
+  if (michelinType === 'bib' || isEco) {
+    return 'vert'
+  }
+
+  return 'bleu'
 }
 
-export async function checkAndUnlockHistoires(userId: number): Promise<any[]> {
-  const newUnlocks: any[] = []
+export function computePasseportPlacement(existingTamponCount: number): {
+  pageNumber: number
+  positionX: number
+  positionY: number
+} {
+  const slotIndex = existingTamponCount % STAMPS_PER_PAGE
+  const pageNumber = Math.floor(existingTamponCount / STAMPS_PER_PAGE) + 1
+  const slot = STAMP_POSITIONS[slotIndex] ?? { x: 25, y: 25 }
 
-  const checkins = await prisma.checkin.findMany({
-    where: { userId },
-    include: { restaurant: true },
+  return {
+    pageNumber,
+    positionX: slot.x,
+    positionY: slot.y,
+  }
+}
+
+export type UnlockedChapitreReward = {
+  id: number
+  chapitreId: number
+  chapitreOrdre: number
+  chapitreTitre: string
+  titre: string
+  description: string
+  unlockedAt: Date
+  isUsed: boolean
+}
+
+export type UnlockedCheckinHistoire = {
+  id: number
+  chapitreId: number
+  chapitreOrdre: number
+  chapitreTitre: string
+  ordre: number
+  restaurantId: number
+  restaurantName: string
+  titre: string
+  contenu: string
+  imageCarteUrl: string | null
+  unlockedAt: Date
+}
+
+const CHAPITRE_REWARD_PRESETS: Record<number, { titre: string; description: string }> = {
+  1: {
+    titre: 'Dessert offert',
+    description: 'Chapitre Les Origines complete : un dessert offert.',
+  },
+  2: {
+    titre: 'Cocktail offert',
+    description: 'Chapitre Les Inspecteurs complete : un cocktail offert.',
+  },
+  3: {
+    titre: 'Coupon -75%',
+    description: 'Chapitre Les Etoiles complete : un coupon de reduction de 75%.',
+  },
+}
+
+export function getChapitreRewardContent(chapitreOrdre: number, chapitreTitre: string) {
+  return (
+    CHAPITRE_REWARD_PRESETS[chapitreOrdre] ?? {
+      titre: `Recompense du chapitre ${chapitreOrdre}`,
+      description: `Chapitre ${chapitreTitre} complete : recompense debloquee.`,
+    }
+  )
+}
+
+export async function unlockNextHistoireForCheckin(
+  userId: number
+): Promise<UnlockedCheckinHistoire | null> {
+  const nextHistoire = await prisma.histoire.findFirst({
+    where: {
+      userHistoires: {
+        none: { userId },
+      },
+    },
+    include: {
+      chapitre: true,
+      restaurant: true,
+    },
+    orderBy: [{ chapitre: { ordre: 'asc' } }, { ordre: 'asc' }],
   })
 
-  const checkinCount = checkins.length
-  const userLevel = getUserLevel(checkinCount)
-
-  const unlockedHistoireIds = (
-    await prisma.userHistoire.findMany({
-      where: { userId },
-      select: { histoireId: true },
-    })
-  ).map((uh) => uh.histoireId)
-
-  const lockedHistoires = await prisma.histoire.findMany({
-    where: { id: { notIn: unlockedHistoireIds.length > 0 ? unlockedHistoireIds : [0] } },
-  })
-
-  const levelOrder = ['Novice', 'Curieux', 'Découvreur', 'Connaisseur', 'Inspecteur', 'Grand Gastronome']
-
-  for (const histoire of lockedHistoires) {
-    const condition = JSON.parse(histoire.conditionUnlock)
-    let shouldUnlock = false
-
-    switch (condition.type) {
-      case 'niveau': {
-        const requiredIdx = levelOrder.indexOf(condition.value)
-        const currentIdx = levelOrder.indexOf(userLevel)
-        shouldUnlock = currentIdx >= requiredIdx
-        break
-      }
-
-      case 'restaurant':
-        shouldUnlock = checkins.some(
-          (c) => c.restaurantId === condition.value
-        )
-        break
-
-      case 'checkin_count':
-        shouldUnlock = checkinCount >= condition.value
-        break
-    }
-
-    if (shouldUnlock) {
-      const userHistoire = await prisma.userHistoire.create({
-        data: { userId, histoireId: histoire.id },
-        include: { histoire: true },
-      })
-      newUnlocks.push(userHistoire)
-    }
+  if (!nextHistoire) {
+    return null
   }
 
-  return newUnlocks
+  const unlockedHistoire = await prisma.userHistoire.create({
+    data: {
+      userId,
+      histoireId: nextHistoire.id,
+    },
+  })
+
+  return {
+    id: nextHistoire.id,
+    chapitreId: nextHistoire.chapitreId,
+    chapitreOrdre: nextHistoire.chapitre.ordre,
+    chapitreTitre: nextHistoire.chapitre.titre,
+    ordre: nextHistoire.ordre,
+    restaurantId: nextHistoire.restaurantId,
+    restaurantName: nextHistoire.restaurant.name,
+    titre: nextHistoire.titre,
+    contenu: nextHistoire.contenu,
+    imageCarteUrl: nextHistoire.imageCarteUrl,
+    unlockedAt: unlockedHistoire.unlockedAt,
+  }
+}
+
+export async function unlockChapitreRewardIfComplete(
+  userId: number,
+  chapitreId: number
+): Promise<UnlockedChapitreReward | null> {
+  const totalHistoiresInChapter = await prisma.histoire.count({
+    where: { chapitreId },
+  })
+
+  if (totalHistoiresInChapter === 0) {
+    return null
+  }
+
+  const unlockedHistoiresInChapter = await prisma.userHistoire.count({
+    where: {
+      userId,
+      histoire: {
+        chapitreId,
+      },
+    },
+  })
+
+  if (unlockedHistoiresInChapter < totalHistoiresInChapter) {
+    return null
+  }
+
+  const chapitreRecompense = await prisma.recompense.findUnique({
+    where: { chapitreId },
+    include: {
+      chapitre: true,
+    },
+  })
+
+  if (!chapitreRecompense) {
+    return null
+  }
+
+  const existingUserReward = await prisma.userRecompense.findUnique({
+    where: {
+      userId_recompenseId: {
+        userId,
+        recompenseId: chapitreRecompense.id,
+      },
+    },
+  })
+
+  if (existingUserReward) {
+    return null
+  }
+
+  const userReward = await prisma.userRecompense.create({
+    data: {
+      userId,
+      recompenseId: chapitreRecompense.id,
+    },
+  })
+
+  const rewardContent = getChapitreRewardContent(
+    chapitreRecompense.chapitre.ordre,
+    chapitreRecompense.chapitre.titre
+  )
+
+  return {
+    id: chapitreRecompense.id,
+    chapitreId: chapitreRecompense.chapitreId,
+    chapitreOrdre: chapitreRecompense.chapitre.ordre,
+    chapitreTitre: chapitreRecompense.chapitre.titre,
+    titre: rewardContent.titre,
+    description: rewardContent.description,
+    unlockedAt: userReward.unlockedAt,
+    isUsed: userReward.isUsed,
+  }
 }

@@ -10,6 +10,9 @@ RUN npx prisma generate
 
 COPY . .
 
+ARG MAPBOX_PUBLIC_TOKEN
+ENV MAPBOX_PUBLIC_TOKEN=$MAPBOX_PUBLIC_TOKEN
+
 RUN npm run build
 
 FROM node:20-alpine AS production
@@ -28,4 +31,4 @@ RUN npm install -g prisma
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "prisma migrate deploy && node .output/server/index.mjs"]
+CMD ["sh", "-c", "prisma db push --accept-data-loss && node .output/server/index.mjs"]

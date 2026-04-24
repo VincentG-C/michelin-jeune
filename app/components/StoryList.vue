@@ -6,9 +6,8 @@
         :key="story.id"
         :title="story.titre"
         :image-url="story.imageCarteUrl"
-        :condition="story.conditionUnlock"
         :unlocked-at="story.unlockedAt"
-        :show-condition="!isUnlockedView"
+        :show-condition="false"
         @click="handleStoryClick(story)"
       />
     </div>
@@ -23,7 +22,7 @@ interface Story {
   id: number
   titre: string
   imageCarteUrl?: string
-  conditionUnlock?: any
+  unlocked?: boolean
   unlockedAt?: string
 }
 
@@ -37,10 +36,9 @@ withDefaults(defineProps<Props>(), {
 })
 
 const handleStoryClick = (story: Story) => {
-  if (story.unlockedAt || !story.conditionUnlock) {
+  if (isUnlockedView || story.unlockedAt || story.unlocked) {
     navigateTo(`/histoires/${story.id}`)
   } else {
-    // Could show a message about unlock condition
     alert('Cette histoire n\'est pas encore débloquée.')
   }
 }

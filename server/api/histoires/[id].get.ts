@@ -12,6 +12,10 @@ export default defineEventHandler(async (event) => {
 
   const histoire = await prisma.histoire.findUnique({
     where: { id },
+    include: {
+      chapitre: true,
+      restaurant: true,
+    },
   })
 
   if (!histoire) {
@@ -22,7 +26,19 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    ...histoire,
-    conditionUnlock: JSON.parse(histoire.conditionUnlock),
+    id: histoire.id,
+    chapitre: {
+      id: histoire.chapitre.id,
+      titre: histoire.chapitre.titre,
+      ordre: histoire.chapitre.ordre,
+    },
+    restaurant: {
+      id: histoire.restaurant.id,
+      name: histoire.restaurant.name,
+    },
+    ordre: histoire.ordre,
+    titre: histoire.titre,
+    contenu: histoire.contenu,
+    imageCarteUrl: histoire.imageCarteUrl,
   }
 })

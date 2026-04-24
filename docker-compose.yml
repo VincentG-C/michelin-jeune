@@ -21,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        MAPBOX_PUBLIC_TOKEN: ${MAPBOX_PUBLIC_TOKEN}
     container_name: michelin_pulse_app
     restart: unless-stopped
     ports:

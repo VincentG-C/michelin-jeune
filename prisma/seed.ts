@@ -10,8 +10,28 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL! })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
+type SeedRestaurant = {
+  id: number
+  name: string
+  michelinType: string
+  isEco: boolean
+}
+
 async function main() {
   console.log('🌱 Seeding database...')
+
+  // Clean existing data (order matters for foreign keys)
+  console.log('🧹 Nettoyage des données existantes...')
+  await prisma.userHistoire.deleteMany()
+  await prisma.userTampon.deleteMany()
+  await prisma.userRecompense.deleteMany()
+  await prisma.checkin.deleteMany()
+  await prisma.histoire.deleteMany()
+  await prisma.recompense.deleteMany()
+  await prisma.tampon.deleteMany()
+  await prisma.chapitre.deleteMany()
+  await prisma.restaurant.deleteMany()
+  console.log('✅ Base nettoyée')
 
   const restaurants = await prisma.restaurant.createMany({
     data: [
@@ -41,7 +61,7 @@ async function main() {
         budget: "high",
         cuisine: "Française moderne",
         ambiance: "Luxueux et raffiné",
-        photoUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb51f3a?w=800",
+        photoUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800",
         description: "Restaurant gastronomique du Four Seasons Hotel George V, une expérience culinaire d'exception.",
         isEco: false,
         isHiddenGem: false,
@@ -145,7 +165,7 @@ async function main() {
       },
 
       {
-        name: "Le Petit Cler",
+        name: "Le Bistrot des Fables",
         address: "29 Rue Cler, 75007 Paris",
         lat: 48.8572,
         lng: 2.3046,
@@ -161,7 +181,7 @@ async function main() {
         isVisual: false,
       },
       {
-        name: "Grandcoeur",
+        name: "La Table de Mee",
         address: "41 Rue du Temple, 75004 Paris",
         lat: 48.8588,
         lng: 2.3540,
@@ -177,7 +197,7 @@ async function main() {
         isVisual: true,
       },
       {
-        name: "Abri",
+        name: "La Cloche d'Or",
         address: "92 Rue du Faubourg Poissonnière, 75010 Paris",
         lat: 48.8765,
         lng: 2.3492,
@@ -226,50 +246,50 @@ async function main() {
       },
 
       {
-        name: "Le Meurice",
-        address: "228 Rue de Rivoli, 75001 Paris",
-        lat: 48.8651,
-        lng: 2.3281,
-        michelinType: "hotel",
-        stars: 5,
-        budget: "high",
-        cuisine: "Française gastronomique",
-        ambiance: "Palace historique",
-        photoUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-        description: "Palace mythique face aux Tuileries, restaurant gastronomique par Alain Ducasse.",
+        name: "Septime",
+        address: "80 Rue de Charonne, 75011 Paris",
+        lat: 48.8531,
+        lng: 2.3818,
+        michelinType: "etoile_1",
+        stars: 1,
+        budget: "medium",
+        cuisine: "Française créative",
+        ambiance: "Décontracté et branché",
+        photoUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800",
+        description: "Bertrand Grébaut propose une cuisine d'auteur inventive dans un cadre décontracté du 11e.",
+        isEco: true,
+        isHiddenGem: false,
+        isVisual: true,
+      },
+      {
+        name: "Le Baratin",
+        address: "3 Rue Jouye-Rouve, 75020 Paris",
+        lat: 48.8712,
+        lng: 2.3858,
+        michelinType: "bib",
+        stars: 0,
+        budget: "low",
+        cuisine: "Bistrot naturel",
+        ambiance: "Populaire et authentique",
+        photoUrl: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800",
+        description: "Institution bellevilloise, Raquel Carena y sert une cuisine franche et des vins nature.",
+        isEco: true,
+        isHiddenGem: true,
+        isVisual: false,
+      },
+      {
+        name: "Clown Bar",
+        address: "114 Rue Amelot, 75011 Paris",
+        lat: 48.8639,
+        lng: 2.3685,
+        michelinType: "bib",
+        stars: 0,
+        budget: "medium",
+        cuisine: "Néo-bistrot créatif",
+        ambiance: "Décalé et artistique",
+        photoUrl: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800",
+        description: "Ancien bar du Cirque d'Hiver, cuisine inventive dans un décor classé de céramiques de clowns.",
         isEco: false,
-        isHiddenGem: false,
-        isVisual: true,
-      },
-      {
-        name: "Hôtel Plaza Athénée",
-        address: "25 Avenue Montaigne, 75008 Paris",
-        lat: 48.8660,
-        lng: 2.3037,
-        michelinType: "hotel",
-        stars: 5,
-        budget: "high",
-        cuisine: "Naturalité",
-        ambiance: "Glamour parisien",
-        photoUrl: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
-        description: "L'adresse iconique de l'avenue Montaigne, terrasse rouge légendaire.",
-        isEco: true,
-        isHiddenGem: false,
-        isVisual: true,
-      },
-      {
-        name: "Hôtel Brach",
-        address: "1-7 Rue Jean Richepin, 75016 Paris",
-        lat: 48.8630,
-        lng: 2.2720,
-        michelinType: "hotel",
-        stars: 5,
-        budget: "high",
-        cuisine: "Méditerranéenne",
-        ambiance: "Design contemporain",
-        photoUrl: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-        description: "Hôtel design signé Philippe Starck, rooftop avec vue sur tout Paris.",
-        isEco: true,
         isHiddenGem: true,
         isVisual: true,
       },
@@ -277,137 +297,219 @@ async function main() {
   })
   console.log(`✅ ${restaurants.count} restaurants créés`)
 
-  const tamponsData = [
-    {
-      name: "Premier Pas",
-      description: "Effectuer votre premier check-in",
-      icon: "👣",
-      condition: JSON.stringify({ type: "checkin_count", value: 1 }),
+  const allRestaurants = await prisma.restaurant.findMany({
+    select: {
+      id: true,
+      name: true,
+      michelinType: true,
+      isEco: true,
     },
-    {
-      name: "Curieux",
-      description: "Visiter 3 restaurants",
-      icon: "🍽️",
-      condition: JSON.stringify({ type: "checkin_count", value: 3 }),
-    },
-    {
-      name: "Découvreur",
-      description: "Visiter 5 restaurants",
-      icon: "⭐",
-      condition: JSON.stringify({ type: "checkin_count", value: 5 }),
-    },
-    {
-      name: "Explorateur",
-      description: "Visiter 10 restaurants",
-      icon: "🔍",
-      condition: JSON.stringify({ type: "checkin_count", value: 10 }),
-    },
-    {
-      name: "Connaisseur",
-      description: "Visiter 25 restaurants",
-      icon: "🎩",
-      condition: JSON.stringify({ type: "checkin_count", value: 25 }),
-    },
-    {
-      name: "Grand Gastronome",
-      description: "Visiter 50 restaurants",
-      icon: "🏆",
-      condition: JSON.stringify({ type: "checkin_count", value: 50 }),
-    },
-    {
-      name: "Chasseur d'Étoiles",
-      description: "Visiter un restaurant 3 étoiles",
-      icon: "🌟",
-      condition: JSON.stringify({ type: "michelinType", value: "etoile_3" }),
-    },
-    {
-      name: "Pépite Trouvée",
-      description: "Visiter une pépite cachée",
-      icon: "🤫",
-      condition: JSON.stringify({ type: "hidden_gem", value: true }),
-    },
-    {
-      name: "Éco-Responsable",
-      description: "Visiter un restaurant eco-friendly",
-      icon: "🌿",
-      condition: JSON.stringify({ type: "eco", value: true }),
-    },
-    {
-      name: "Bib Gourmand Fan",
-      description: "Visiter 3 restaurants Bib Gourmand",
-      icon: "😋",
-      condition: JSON.stringify({ type: "bib_count", value: 3 }),
-    },
+  }) as SeedRestaurant[]
+
+  const designerTampons: Record<string, string> = {
+    'Le Bistrot des Fables': '/tampons/le-bistrot-des-fables.png',
+    'La Table de Mee': '/tampons/la-table-de-mee.png',
+    "La Cloche d'Or": '/tampons/la-cloche-dor.png',
+  }
+
+  const getTamponColor = (michelinType: string, isEco: boolean): string => {
+    if (michelinType.startsWith('etoile')) return 'bordeaux'
+    if (michelinType === 'bib' || isEco) return 'vert'
+    return 'bleu'
+  }
+
+  const tamponsData = allRestaurants.map((restaurant: SeedRestaurant) => ({
+    restaurantId: restaurant.id,
+    imageUrl: designerTampons[restaurant.name] ?? null,
+    color: getTamponColor(restaurant.michelinType, restaurant.isEco),
+  }))
+
+  const tampons = await prisma.tampon.createMany({
+    data: tamponsData,
+  })
+  console.log(`✅ ${tampons.count} tampons restaurants créés`)
+
+  const chapitre1 = await prisma.chapitre.upsert({
+    where: { ordre: 1 },
+    update: { titre: 'Dossier N°1' },
+    create: { titre: 'Dossier N°1', ordre: 1 },
+  })
+
+  const chapitre2 = await prisma.chapitre.upsert({
+    where: { ordre: 2 },
+    update: { titre: 'Dossier N°2' },
+    create: { titre: 'Dossier N°2', ordre: 2 },
+  })
+
+  const chapitre3 = await prisma.chapitre.upsert({
+    where: { ordre: 3 },
+    update: { titre: 'Dossier N°3' },
+    create: { titre: 'Dossier N°3', ordre: 3 },
+  })
+
+  const orderedRestaurants = [...allRestaurants].sort((a, b) => a.id - b.id)
+  const restaurantByName = new Map(allRestaurants.map((restaurant) => [restaurant.name, restaurant]))
+
+  const chapitre1Restaurants = [
+    restaurantByName.get('Le Bistrot des Fables'),
+    restaurantByName.get('La Table de Mee'),
+    restaurantByName.get("La Cloche d'Or"),
   ]
 
-  for (const tampon of tamponsData) {
-    await prisma.tampon.create({ data: tampon })
+  const chapitre1RestaurantIds = new Set(
+    chapitre1Restaurants
+      .filter((restaurant): restaurant is NonNullable<typeof restaurant> => Boolean(restaurant))
+      .map((restaurant) => restaurant.id)
+  )
+
+  const remainingRestaurants = orderedRestaurants.filter(
+    (restaurant) => !chapitre1RestaurantIds.has(restaurant.id)
+  )
+
+  const chapitre2Restaurants = [remainingRestaurants[0], remainingRestaurants[1], remainingRestaurants[2]]
+  const chapitre3Restaurants = [remainingRestaurants[3], remainingRestaurants[4], remainingRestaurants[5]]
+
+  const allChapitresRestaurants = [
+    ...chapitre1Restaurants,
+    ...chapitre2Restaurants,
+    ...chapitre3Restaurants,
+  ]
+
+  if (allChapitresRestaurants.some((restaurant) => !restaurant)) {
+    throw new Error('Impossible de mapper les restaurants requis pour les 3 chapitres')
   }
-  console.log(`✅ ${tamponsData.length} tampons créés`)
 
   const histoiresData = [
+    // Dossier 1
     {
-      titre: "La Naissance du Guide",
-      contenu:
-        "En 1900, André Michelin crée un petit guide rouge offert aux automobilistes. À l'époque, la France ne compte que 3 000 voitures. Le guide propose des conseils pratiques : comment changer un pneu, où trouver de l'essence, et bien sûr, où bien manger. Personne ne se doutait que ce modeste livret deviendrait la bible de la gastronomie mondiale.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1585540083814-ea6ee8af9e4f?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Curieux" }),
+      chapitreId: chapitre1.id,
+      restaurantId: chapitre1Restaurants[0]!.id,
+      titre: 'Le crime de la fourchette',
+      contenu: "Tu penses que la France a inventé les bonnes manières ? Pas du tout. Jusqu'en **1533**, les Français les plus chics mangeaient avec leurs **doigts** et s'essuyaient sur la nappe. C'est **Catherine de Médicis** qui débarque d'Italie avec un objet jugé \"scandaleux\" à l'époque : la fourchette.",
+      imageCarteUrl: '/images/histoire-fourchette.png',
+      ordre: 1,
     },
     {
-      titre: "La Première Étoile",
-      contenu:
-        "C'est en 1926 que le Guide Michelin commence à attribuer des étoiles aux restaurants. Une seule étoile d'abord, pour signaler les 'bonnes tables'. Le système à trois étoiles arrive en 1931, avec sa fameuse hiérarchie : une étoile pour une très bonne table, deux étoiles pour une cuisine excellente 'méritant un détour', et trois étoiles pour une cuisine exceptionnelle 'valant le voyage'.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Découvreur" }),
+      chapitreId: chapitre1.id,
+      restaurantId: chapitre1Restaurants[1]!.id,
+      titre: 'La vengeance de la pomme de terre',
+      contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
+      imageCarteUrl: '/images/pommedeterre.jpg',
+      ordre: 2,
     },
     {
-      titre: "Le Secret des Inspecteurs",
-      contenu:
-        "Les inspecteurs Michelin sont les agents secrets de la gastronomie. Anonymes, ils visitent les restaurants en payant leur addition comme n'importe quel client. Leur identité est si bien gardée que même leurs familles ignorent parfois les détails de leur travail. Un inspecteur visite en moyenne 250 restaurants par an et prend ses repas seul pour rester concentré sur l'assiette.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Connaisseur" }),
+      chapitreId: chapitre1.id,
+      restaurantId: chapitre1Restaurants[2]!.id,
+      titre: 'Le premier \"restau\" de l\'histoire',
+      contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
+      imageCarteUrl: '/images/histoire-restaurant.jpg',
+      ordre: 3,
+    },
+    // Dossier 2 (mêmes histoires dupliquées)
+    {
+      chapitreId: chapitre2.id,
+      restaurantId: chapitre2Restaurants[0]!.id,
+      titre: 'Le crime de la fourchette',
+      contenu: "Tu penses que la France a inventé les bonnes manières ? Pas du tout. Jusqu'en **1533**, les Français les plus chics mangeaient avec leurs **doigts** et s'essuyaient sur la nappe. C'est **Catherine de Médicis** qui débarque d'Italie avec un objet jugé \"scandaleux\" à l'époque : la fourchette.",
+      imageCarteUrl: '/images/histoire-fourchette.png',
+      ordre: 1,
     },
     {
-      titre: "Le Drame des Étoiles Perdues",
-      contenu:
-        "Perdre une étoile Michelin peut être dévastateur. En 2003, le chef Bernard Loiseau se donne la mort, hanté par la rumeur de la perte de sa troisième étoile. Ce drame a profondément marqué le monde de la gastronomie et a soulevé des questions sur la pression que le système d'étoiles exerce sur les chefs. Depuis, le Guide a évolué vers plus de transparence.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Inspecteur" }),
+      chapitreId: chapitre2.id,
+      restaurantId: chapitre2Restaurants[1]!.id,
+      titre: 'La vengeance de la pomme de terre',
+      contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
+      imageCarteUrl: '/images/pommedeterre.jpg',
+      ordre: 2,
     },
     {
-      titre: "Le Bib Gourmand : L'Étoile du Peuple",
-      contenu:
-        "Créé en 1997, le Bib Gourmand (du surnom de Bibendum, la mascotte Michelin) récompense les restaurants offrant un excellent rapport qualité-prix. C'est la reconnaissance que la bonne cuisine n'est pas réservée aux grandes tables. Le Bib est devenu un symbole pour les gourmets malins qui veulent bien manger sans se ruiner.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
-      conditionUnlock: JSON.stringify({ type: "restaurant", value: 9 }),
+      chapitreId: chapitre2.id,
+      restaurantId: chapitre2Restaurants[2]!.id,
+      titre: 'Le premier \"restau\" de l\'histoire',
+      contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
+      imageCarteUrl: '/images/histoire-restaurant.jpg',
+      ordre: 3,
+    },
+    // Dossier 3 (mêmes histoires dupliquées)
+    {
+      chapitreId: chapitre3.id,
+      restaurantId: chapitre3Restaurants[0]!.id,
+      titre: 'Le crime de la fourchette',
+      contenu: "Tu penses que la France a inventé les bonnes manières ? Pas du tout. Jusqu'en **1533**, les Français les plus chics mangeaient avec leurs **doigts** et s'essuyaient sur la nappe. C'est **Catherine de Médicis** qui débarque d'Italie avec un objet jugé \"scandaleux\" à l'époque : la fourchette.",
+      imageCarteUrl: '/images/histoire-fourchette.png',
+      ordre: 1,
     },
     {
-      titre: "Bibendum : La Mascotte Immortelle",
-      contenu:
-        "Le Bonhomme Michelin, ou Bibendum, est né en 1898 quand Édouard Michelin voit une pile de pneus et dit 'Si elle avait des bras, elle aurait l'air d'un bonhomme'. Dessiné par Marius Rossillon, Bibendum est devenu l'une des plus anciennes et plus reconnues mascottes publicitaires au monde. En 2000, il a été élu 'meilleur logo du siècle'.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1495461199391-8c39ab674581?w=800",
-      conditionUnlock: JSON.stringify({ type: "checkin_count", value: 1 }),
+      chapitreId: chapitre3.id,
+      restaurantId: chapitre3Restaurants[1]!.id,
+      titre: 'La vengeance de la pomme de terre',
+      contenu: "Pendant longtemps, la France a cru que **la pomme de terre** donnait la lèpre ! Pour forcer les gens à en manger, un agronome nommé Parmentier a utilisé une ruse géniale : il a fait garder son champ de patates par des **soldats armés** le jour. Les gens ont cru que c'était un trésor précieux et, dès que les gardes partaient la nuit, ils venaient en voler pour les goûter. C'est comme ça que la frite est devenue française !",
+      imageCarteUrl: '/images/pommedeterre.jpg',
+      ordre: 2,
     },
     {
-      titre: "Le Guide Pendant la Guerre",
-      contenu:
-        "Pendant la Seconde Guerre mondiale, la publication du Guide est interrompue. Mais en 1944, les Alliés demandent à Michelin de réimprimer l'édition 1939 du guide de France — c'est la cartographie la plus précise disponible pour planifier le Débarquement en Normandie. Le Guide Michelin a littéralement aidé à libérer la France.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=800",
-      conditionUnlock: JSON.stringify({ type: "niveau", value: "Grand Gastronome" }),
-    },
-    {
-      titre: "La Conquête du Monde",
-      contenu:
-        "Longtemps cantonné à l'Europe, le Guide Michelin s'est internationalisé à partir de 2005 avec New York, puis Tokyo en 2007. Tokyo est rapidement devenue la ville la plus étoilée du monde, dépassant Paris. Aujourd'hui, le Guide couvre plus de 40 pays sur tous les continents, de São Paulo à Bangkok, de Séoul à Dubaï.",
-      imageCarteUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800",
-      conditionUnlock: JSON.stringify({ type: "checkin_count", value: 15 }),
+      chapitreId: chapitre3.id,
+      restaurantId: chapitre3Restaurants[2]!.id,
+      titre: 'Le premier \"restau\" de l\'histoire',
+      contenu: "Avant cette date, on ne choisissait pas son menu : on mangeait ce que l'**aubergiste** servait, tous à la même table. Un homme nommé **Boulanger** a ouvert un lieu à Paris en vendant des bouillons \"restaurants\" (qui restaurent les forces). Il a été traîné en justice par les traiteurs de l'époque qui voulaient garder le monopole de la viande. Il a **gagné**, et le concept de s'asseoir à sa propre table avec une carte était né.",
+      imageCarteUrl: '/images/histoire-restaurant.png',
+      ordre: 3,
     },
   ]
 
   for (const histoire of histoiresData) {
-    await prisma.histoire.create({ data: histoire })
+    await prisma.histoire.upsert({
+      where: { restaurantId: histoire.restaurantId },
+      update: histoire,
+      create: histoire,
+    })
   }
   console.log(`✅ ${histoiresData.length} histoires créées`)
+
+  const recompense1 = await prisma.recompense.upsert({
+    where: { chapitreId: chapitre1.id },
+    update: {
+      titre: 'Dessert offert',
+      description: 'Dossier N°1 complété : un dessert offert dans un restaurant partenaire.',
+    },
+    create: {
+      chapitreId: chapitre1.id,
+      titre: 'Dessert offert',
+      description: 'Dossier N°1 complété : un dessert offert dans un restaurant partenaire.',
+    },
+  })
+
+  const recompense2 = await prisma.recompense.upsert({
+    where: { chapitreId: chapitre2.id },
+    update: {
+      titre: 'Entrée offerte',
+      description: 'Dossier N°2 complété : une entrée offerte dans un restaurant partenaire.',
+    },
+    create: {
+      chapitreId: chapitre2.id,
+      titre: 'Entrée offerte',
+      description: 'Dossier N°2 complété : une entrée offerte dans un restaurant partenaire.',
+    },
+  })
+
+  const recompense3 = await prisma.recompense.upsert({
+    where: { chapitreId: chapitre3.id },
+    update: {
+      titre: 'Café gourmand offert',
+      description: 'Dossier N°3 complété : un café gourmand offert dans un restaurant partenaire.',
+    },
+    create: {
+      chapitreId: chapitre3.id,
+      titre: 'Café gourmand offert',
+      description: 'Dossier N°3 complété : un café gourmand offert dans un restaurant partenaire.',
+    },
+  })
+
+  await prisma.chapitre.update({ where: { id: chapitre1.id }, data: { recompenseId: recompense1.id } })
+  await prisma.chapitre.update({ where: { id: chapitre2.id }, data: { recompenseId: recompense2.id } })
+  await prisma.chapitre.update({ where: { id: chapitre3.id }, data: { recompenseId: recompense3.id } })
+
+  console.log('✅ 3 récompenses de chapitres créées')
 
   console.log('🎉 Seed terminé avec succès !')
 }
